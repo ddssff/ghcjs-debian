@@ -1,0 +1,19 @@
+ghcjs (0.1.0-2) unstable; urgency=low
+
+  * Merge the build of ghcjs-tools.
+
+ -- David Fox <dsf@seereason.com>  Tue, 08 Jul 2014 10:31:44 -0700
+
+ghcjs (0.1.0-1) unstable; urgency=low
+
+  * Add the files that the build puts in /homedoesnotexistatbuildtime to
+    the binary packages.  This isn't what we want, but at least it works.
+
+ -- David Fox <dsf@seereason.com>  Tue, 10 Jun 2014 12:38:26 -0700
+
+ghcjs (0.1.0) unstable; urgency=low
+
+  * Initial import.
+
+ -- David Fox <dsf@seereason.com>  Mon, 09 Jun 2014 10:43:59 -0700
+

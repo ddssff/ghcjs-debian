@@ -1,0 +1,30 @@
+Source: ghcjs
+Priority: optional
+Section: devel
+Maintainer: David Fox <dsf@seereason.com>
+Build-Depends: ghcjs-tools
+               , haskell-devscripts
+               , cabal-install-ghcjs (>= 1.21)
+               , libghc-cabal-dev (>= 1.21)
+               , alex
+               , happy
+               , make
+               , patch
+               , autoconf
+               , cpp
+               , git
+               , libtool
+               , cdbs
+               , nodejs (>= 0.10.24)
+               , haskell-devscripts
+               , libghc-debian-dev
+               , libghc-shelly-dev
+               , libghc-regex-tdfa-dev
+               , libghc-text-dev
+
+Package: ghcjs
+Architecture: any
+Section: devel
+Depends: ghcjs-tools
+Provides: ${haskell:Provides}
+Description: GHCJS runtime system
