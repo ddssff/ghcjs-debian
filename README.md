@@ -8,6 +8,12 @@ and packages all the compiled standard libraries.  Installing the
 resulting ghcjs debian package produces in a fully functioning ghcjs
 system.
 
-You will also need to build a new version of the Cabal library using
-the debianization in cabal-ghcjs-debin, and a new version of cabal-install
-using the debianization in cabal-install-ghcjs-debian.
+Three other packages are build dependencies of ghcjs and part of the
+ghcjs project.  Debianizations are provided here.
+
+  * Cabal (modified for ghcjs)
+  * cabal-install (modified for ghcjs)
+  * ghcjs-prim
+
+Depending on your OS version, it may be necessary to build other
+packages such as nodejs from sid.
