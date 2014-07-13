@@ -28,3 +28,7 @@ Section: devel
 Depends: ghcjs-tools
 Provides: ${haskell:Provides}
 Description: GHCJS runtime system
+ Runtime system for GHCJS Haskell to JavaScript compiler
+ .
+  Author: Victor Nazarov, Hamish Mackenzie, Luite Stegeman
+  Upstream-Maintainer: Luite Stegeman
