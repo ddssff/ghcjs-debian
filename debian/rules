@@ -5,3 +5,6 @@ include /usr/share/cdbs/1/class/hlibrary.mk
 
 build/ghcjs::
 	runhaskell debian/Setup.hs
+
+clean::
+	rm -rf usr debian/ghcjs.install debian/ghcjs.substvars.tmp
