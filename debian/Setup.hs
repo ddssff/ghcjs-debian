@@ -50,11 +50,18 @@ main = do
     -- Copy into the build directory
     mkdir_p (fromText (pack home))
     run_ "rsync" ["-aHxS", "--delete", pack (ab home) <> "/", pack home]
+    liftIO $ hPutStrLn stderr "Finished rsync"
     -- Build the debhelper install file for the ghcjs package
     silently (run "find" [pack home, "-type", "f"]) >>=
       liftIO . writeFile "debian/ghcjs.install" . unpack . unlines . map (\ s -> s <> " " <> (pack . takeDirectory . unpack $ s)) . Text.lines
+    liftIO $ hPutStrLn stderr "Finished building ghcjs.install"
+    libs <- liftIO compilerLibs
+    liftIO $ hPutStrLn stderr $ "compilerLibs: " ++ show libs
+    liftIO $ hPutStrLn stderr $ "providesLine: " ++ show (providesLine libs)
     -- Build the debhelper substvar assignment for the provided libraries
     compilerProvides
+    ls <- liftIO $ readProcess "ls" ["-l", "debian"] ""
+    liftIO $ hPutStrLn stderr $ "debian/Setup.hs finished:\n" ++ ls
 
 -- | Use ghcjs-pkg to find the list of libraries built into ghcjs,
 -- turn them into debian virtual package names, and build an
