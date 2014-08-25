@@ -3,8 +3,11 @@
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/hlibrary.mk
 
-build/ghcjs:: build-ghc-stamp
+build/ghcjs:: debian/ghcjs-build-stamp
+
+debian/ghcjs-build-stamp:
 	runhaskell debian/Setup.hs
+	touch $@
 
 clean::
-	rm -rf usr debian/ghcjs.install debian/ghcjs.substvars.tmp
+	rm -rf usr debian/ghcjs-build-stamp debian/ghcjs.install debian/ghcjs.substvars.tmp
