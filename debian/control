@@ -6,7 +6,7 @@ Build-Depends: ghcjs-tools
                , haskell-devscripts
                , cabal-install-ghcjs (>= 1.21)
                , libghc-cabal-ghcjs-dev (>= 1.21)
-               , haddock-internal
+               , haddock-api
                , alex
                , happy
                , make
