@@ -18,7 +18,6 @@ Build-Depends: ghcjs-tools
                , cdbs
                , nodejs (>= 0.10.24)
                , haskell-devscripts
-               , libghc-debian-dev
                , libghc-shelly-dev
                , libghc-regex-tdfa-dev
                , libghc-text-dev

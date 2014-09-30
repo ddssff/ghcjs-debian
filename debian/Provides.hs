@@ -6,7 +6,6 @@ import Data.Char (toLower)
 import Data.List as List (intercalate, lines)
 import Data.Monoid ((<>))
 import Data.Text as Text (Text, pack, unpack, unlines, lines)
-import Debian.Relation (BinPkgName(..))
 import Shelly
 import System.Environment (setEnv)
 import System.FilePath (takeDirectory)
@@ -40,16 +39,16 @@ main = do
 compilerProvides :: MonadIO m => m ()
 compilerProvides = liftIO $ compilerLibs >>= appendFile "debian/ghcjs.substvars" . providesLine
 
-compilerLibs :: IO [BinPkgName]
+compilerLibs :: IO [String]
 compilerLibs = (concatMap parseLib . List.lines) <$> readProcess "ghcjs-pkg" ["list", "-v2"] ""
 
-providesLine :: [BinPkgName] -> String
-providesLine libs = "haskell:Provides=" ++ intercalate ", " (map unBinPkgName libs) ++ "\n"
+providesLine :: [String] -> String
+providesLine libs = "haskell:Provides=" ++ intercalate ", " libs ++ "\n"
 
-parseLib :: String -> [BinPkgName]
+parseLib :: String -> [String]
 parseLib s =
     case s =~ ("^.*\\((.*)-([0-9.]*)-(.....)...........................\\)$" :: String) :: (String, String, String, [String]) of
       (_, _, _, [name,ver,chk]) ->
-          [BinPkgName ("libghcjs-" <> map toLower name <> "-dev"),
-           BinPkgName ("libghcjs-" <> map toLower name <> "-dev-" <> ver <> "-" <> chk)]
+          ["libghcjs-" <> map toLower name <> "-dev",
+           "libghcjs-" <> map toLower name <> "-dev-" <> ver <> "-" <> chk]
       _ -> []
