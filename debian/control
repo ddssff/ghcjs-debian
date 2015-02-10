@@ -25,7 +25,7 @@ Build-Depends: ghcjs-tools
 Package: ghcjs
 Architecture: any
 Section: devel
-Depends: ghcjs-tools
+Depends: ghcjs-tools, nodejs (>= 0.10.24)
 Provides: ${haskell:Provides}
 Description: GHCJS runtime system
  Runtime system for GHCJS Haskell to JavaScript compiler
