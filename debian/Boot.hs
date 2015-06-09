@@ -24,7 +24,7 @@ main = do
     rm_rf (fromText (pack (ab home)))
     mkdir_p (fromText (pack (ab home)) </> pack ".cabal")
     run_ "cabal" ["update"]
-    run_ "ghcjs-boot" ["-v3", "--with-node", "/usr/bin/nodejs"]
+    run_ "ghcjs-boot" ["--with-node", "/usr/bin/nodejs"]
     -- Clean out files we don't want in the binary package
     let junk = ["*/config.guess", "*/config.sub", "*/ghcjs-boot", "*/packages/hackage.haskell.org", "*/.cabal/logs", "*/.git"]
     run "find" ([pack (ab home)] ++ concat (intersperse ["-o"] (map (\ p -> ["-path", p]) junk))) >>= mapM_ (rm_rf . fromText) . Text.lines
