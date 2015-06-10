@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP, OverloadedStrings #-}
 
 import Data.List (intersperse)
 import Data.Monoid ((<>))
@@ -24,7 +24,11 @@ main = do
     rm_rf (fromText (pack (ab home)))
     mkdir_p (fromText (pack (ab home)) </> pack ".cabal")
     run_ "cabal" ["update"]
-    run_ "ghcjs-boot" ["--with-node", "/usr/bin/nodejs", "--ghcjs-boot-dev-branch", "ghc-7.10"]
+    run_ "ghcjs-boot" ["--with-node", "/usr/bin/nodejs"
+#if __GLASGOW_HASKELL__ >= 710
+                      , "--ghcjs-boot-dev-branch", "ghc-7.10"
+#endif
+                      ]
     -- Clean out files we don't want in the binary package
     let junk = ["*/config.guess", "*/config.sub", "*/ghcjs-boot", "*/packages/hackage.haskell.org", "*/.cabal/logs", "*/.git"]
     run "find" ([pack (ab home)] ++ concat (intersperse ["-o"] (map (\ p -> ["-path", p]) junk))) >>= mapM_ (rm_rf . fromText) . Text.lines
