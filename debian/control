@@ -5,7 +5,7 @@ Maintainer: David Fox <dsf@seereason.com>
 Build-Depends: ghcjs-tools
                , haskell-devscripts
                , cabal-install (>= 1.21)
-               , libghc-cabal-122-dev (>= 1.21)
+               , libghc-cabal-dev (>= 1.22) | ghc
                , haddock-api
                , alex
                , happy
