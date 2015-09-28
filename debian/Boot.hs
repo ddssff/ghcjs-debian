@@ -26,7 +26,7 @@ main = do
     run_ "cabal" ["update"]
     run_ "ghcjs-boot" ["--with-node", "/usr/bin/nodejs"
 #if __GLASGOW_HASKELL__ >= 710
-                      , "--ghcjs-boot-dev-branch", "old-base-ghc-7.10"
+                      , "--ghcjs-boot-dev-branch", "master"
 #endif
                       ]
     -- Clean out files we don't want in the binary package
