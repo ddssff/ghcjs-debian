@@ -9,14 +9,14 @@ configure/ghcjs::
 build/ghcjs:: debian/ghcjs-build-stamp
 
 debian/ghcjs-build-stamp:
-	runhaskell debian/Boot.hs
+	. debian/boot
 	touch $@
 
 install/ghcjs:: debian/ghcjs-binary-stamp
 
 debian/ghcjs-binary-stamp:
-	runhaskell debian/Provides.hs
+	runhaskell -idebian debian/Provides.hs
 	touch $@
 
 clean::
-	rm -rf usr debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.substvars.tmp
+	rm -rf usr ghcjs debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.substvars.tmp

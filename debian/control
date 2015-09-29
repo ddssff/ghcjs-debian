@@ -2,30 +2,13 @@ Source: ghcjs
 Priority: optional
 Section: devel
 Maintainer: David Fox <dsf@seereason.com>
-Build-Depends: ghcjs-tools
-               , haskell-devscripts
-               , cabal-install (>= 1.21)
-               , libghc-cabal-dev (>= 1.22) | ghc
-               , haddock-api
-               , alex
-               , happy
-               , make
-               , patch
-               , autoconf
-               , cpp
-               , git
-               , libtool
-               , cdbs
-               , nodejs (>= 0.10.24)
-               , haskell-devscripts
-               , libghc-shelly-dev
-               , libghc-regex-tdfa-dev
-               , libghc-text-dev
+Build-Depends: happy, alex, cabal-install, git, ghc (>= 7.10.2), nodejs, autoconf,
+               libghc-shelly-dev, libghc-regex-tdfa-dev, libghc-text-dev
 
 Package: ghcjs
 Architecture: any
 Section: devel
-Depends: ghcjs-tools, nodejs (>= 0.10.24)
+Depends: ghc (>= 7.10.2), nodejs (>= 0.10.24)
 Provides: ${haskell:Provides}
 Description: GHCJS runtime system
  Runtime system for GHCJS Haskell to JavaScript compiler

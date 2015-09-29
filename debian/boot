@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+set -x
+
+# apt-get update
+# apt-get --yes --force-yes dist-upgrade
+# apt-get install --yes --force-yes happy alex cabal-install git ghc nodejs autoconf
+
+SOURCE=ghcjs
+export HOME=$PWD/usr/lib/ghcjs
+
+rm -rf $HOME ghcjs
+mkdir -p $HOME
+cabal update
+git clone https://github.com/ghcjs/ghcjs $SOURCE
+cabal install ./$SOURCE
+# Make sure we see the new ghcjs-boot rather than the installed version
+PATH=$HOME/.cabal/bin:$PATH
+ghcjs-boot --dev --with-node /usr/bin/nodejs

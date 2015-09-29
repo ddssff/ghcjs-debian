@@ -1,3 +1,9 @@
+ghcjs (0.2.0-1) unstable; urgency=low
+
+  * improved-base
+
+ -- David Fox <dsf@seereason.com>  Tue, 29 Sep 2015 08:29:33 -0700
+
 ghcjs (0.1.0-2) unstable; urgency=low
 
   * Merge the build of ghcjs-tools.
