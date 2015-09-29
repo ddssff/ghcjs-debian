@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+DEB_DH_SHLIBDEPS_ARGS += -Xusr/lib/ghcjs/.ghcjs -XlibHSghcjs
+
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
 
