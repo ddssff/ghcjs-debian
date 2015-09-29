@@ -47,7 +47,7 @@ main = do
     liftIO . writeFile "debian/ghcjs.install" . unlines . map (\ s -> s <> " " <> (takeDirectory $ s)) . lines
 
   compilerProvides
-  -- editWrappers build homeAbsolute
+  editWrappers build homeAbsolute
 
 modifyEnv :: String -> (String -> String) -> IO ()
 modifyEnv var f = getEnv var >>= \old -> setEnv var (f old)
@@ -79,19 +79,26 @@ parseLib s =
 -- leaving paths starting with /usr/lib/ghcjs.
 editWrappers :: String -> String -> IO ()
 editWrappers old new =
-    getDirectoryContents dir >>= mapM_ editWrapper
+    getDirectoryContents dir >>= mapM_ doFile
     where
       dir = "usr/lib/ghcjs/.cabal/bin"
-      editWrapper :: String -> IO ()
-      editWrapper "ghcjs-boot" = return () -- not a wrapper
-      editWrapper "ghcjs-run" = return () -- not a wrapper
-      editWrapper linkname =
+      doFile linkname =
           (try . readSymbolicLink) (dir <> "/" <> linkname) >>=
-          either (\(_ :: IOError) -> return ()) (\scriptname -> editFile fixPaths (dir <> "/" <> scriptname))
-      editFile :: (String -> String) -> String -> IO ()
-      editFile f p = readFile p >>= replaceFile p . f
+          either (\(_ :: IOError) -> return ()) (doLink linkname)
+      doLink linkname linktext = do
+        ln ("/" <> dir <> "/" <> linkname) ("/" <> dir <> "/" <> linktext)
+        ln ("/usr/bin/" <> linkname) ("/" <> dir <> "/" <> linktext)
+        editWrapper linkname linktext
 
-      -- Remove /home/dsf/git/ghcjs-debian
+      ln linktext linkpath = appendFile "debian/ghcjs.links" (linkpath <> " " <> linktext <> "\n")
+
+      editWrapper :: String -> String -> IO ()
+      editWrapper "ghcjs-boot" _ = return () -- not a wrapper
+      editWrapper "ghcjs-run" _ = return () -- not a wrapper
+      editWrapper _ linktext =
+          readFile (dir <> "/" <> linktext) >>= replaceFile (dir <> "/" <> linktext) . fixPaths
+
+      -- Remove prefix $HOME from wrapper script paths
       fixPaths :: String -> String
       fixPaths [] = []
       fixPaths s | isPrefixOf new s = new <> fixPaths (drop (length new) s)
