@@ -1,0 +1,6 @@
+/usr/lib/ghcjs/.cabal/bin/ghcjs /usr/bin/ghcjs
+/usr/lib/ghcjs/.cabal/bin/ghcjs-boot /usr/bin/ghcjs-boot
+/usr/lib/ghcjs/.cabal/bin/ghcjs-pkg /usr/bin/ghcjs-pkg
+/usr/lib/ghcjs/.cabal/bin/ghcjs-run /usr/bin/ghcjs-run
+/usr/lib/ghcjs/.cabal/bin/haddock-ghcjs /usr/bin/haddock-ghcjs
+/usr/lib/ghcjs/.cabal/bin/hsc2hs-ghcjs /usr/bin/hsc2hs-ghcjs

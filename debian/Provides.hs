@@ -11,7 +11,7 @@ import Control.Monad.Trans (MonadIO)
 import Data.Char (toLower)
 import Data.List as List (intercalate, isPrefixOf, lines)
 import Data.Monoid ((<>))
-import Data.Text as Text (Text, pack, unpack, unlines, lines)
+import Data.Text as Text (Text)
 import Shelly
 import System.Environment (setEnv)
 import System.FilePath (takeDirectory)
@@ -25,30 +25,39 @@ import System.Posix.Files (readSymbolicLink)
 -- I've never seen this either.  I can only guess what it does.
 default (Text)
 
-home :: String
-home = "usr/lib/ghcjs"
+homeRelative :: String
+homeRelative = "usr/lib/ghcjs"
 
-ab :: String -> String
-ab p = "/" <> p
+homeAbsolute :: String
+homeAbsolute = "/" <> homeRelative
 
 main :: IO ()
 main = do
-  here <- getEnv "PWD"
-  setEnv "HOME" (here <> "/" <> home)
-  shelly $ do
-    -- Build the debhelper install file for the ghcjs package
-    silently (run "find" [pack home, "-type", "f"]) >>=
-      liftIO . writeFile "debian/ghcjs.install" . unpack . Text.unlines . map (\ s -> s <> " " <> (pack . takeDirectory . unpack $ s)) . Text.lines
-    -- Build the debhelper substvar assignment for the provided libraries
-    compilerProvides
+  build <- (++ homeAbsolute) <$> getEnv "PWD"
+  setEnv "HOME" build
 
-  -- Edit the wrapper scripts to reflect the real install directory
-  moveWrappers (here <> "/" <> home) ("/" <> home)
+  -- For debugging, reverse the edits on the wrappers so they work "in
+  -- place".
+  editWrappers homeAbsolute build
+
+  -- Make sure the new ghcjs binaries are in the PATH
+  modifyEnv "PATH" ((build <> "/.cabal/bin:") <>)
+
+  readProcess "find" [homeRelative, "-type", "f"] mempty >>=
+    liftIO . writeFile "debian/ghcjs.install" . unlines . map (\ s -> s <> " " <> (takeDirectory $ s)) . lines
+
+  compilerProvides
+  -- editWrappers build homeAbsolute
+
+modifyEnv :: String -> (String -> String) -> IO ()
+modifyEnv var f = getEnv var >>= \old -> setEnv var (f old)
+
 
 -- | Use ghcjs-pkg to find the list of libraries built into ghcjs,
 -- turn them into debian virtual package names, and build an
 -- assignment to shell variable haskell:Provides.  That goes into the
--- ghcjs.substvars file.
+-- ghcjs.substvars file.  There may already be something there by the
+-- time this is called, so we append.  So, not idempotent.
 compilerProvides :: MonadIO m => m ()
 compilerProvides = liftIO $ compilerLibs >>= appendFile "debian/ghcjs.substvars" . providesLine
 
@@ -68,15 +77,15 @@ parseLib s =
 
 -- | Strip the prefix containing $PWD from the paths in the wrapper scripts,
 -- leaving paths starting with /usr/lib/ghcjs.
-moveWrappers :: String -> String -> IO ()
-moveWrappers old new =
-    getDirectoryContents dir >>= mapM_ moveWrapper
+editWrappers :: String -> String -> IO ()
+editWrappers old new =
+    getDirectoryContents dir >>= mapM_ editWrapper
     where
       dir = "usr/lib/ghcjs/.cabal/bin"
-      moveWrapper :: String -> IO ()
-      moveWrapper "ghcjs-boot" = return () -- not a wrapper
-      moveWrapper "ghcjs-run" = return () -- not a wrapper
-      moveWrapper linkname =
+      editWrapper :: String -> IO ()
+      editWrapper "ghcjs-boot" = return () -- not a wrapper
+      editWrapper "ghcjs-run" = return () -- not a wrapper
+      editWrapper linkname =
           (try . readSymbolicLink) (dir <> "/" <> linkname) >>=
           either (\(_ :: IOError) -> return ()) (\scriptname -> editFile fixPaths (dir <> "/" <> scriptname))
       editFile :: (String -> String) -> String -> IO ()
@@ -85,5 +94,6 @@ moveWrappers old new =
       -- Remove /home/dsf/git/ghcjs-debian
       fixPaths :: String -> String
       fixPaths [] = []
+      fixPaths s | isPrefixOf new s = new <> fixPaths (drop (length new) s)
       fixPaths s | isPrefixOf old s = new <> fixPaths (drop (length old) s)
       fixPaths (c:s) = c : fixPaths s

@@ -19,4 +19,4 @@ debian/ghcjs-binary-stamp:
 	touch $@
 
 clean::
-	rm -rf usr ghcjs debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.substvars.tmp
+	rm -rf usr ghcjs debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.substvars debian/ghcjs.triggers
