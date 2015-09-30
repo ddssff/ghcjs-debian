@@ -9,7 +9,9 @@ Package: ghcjs
 Architecture: any
 Section: devel
 Depends: ghc (>= 7.10.2), nodejs (>= 0.10.24)
-Provides: ${haskell:Provides}
+Provides: ${haskell:Provides}, ghcjs-tools
+Conflicts: ghcjs-tools
+Replaces: ghcjs-tools
 Description: GHCJS runtime system
  Runtime system for GHCJS Haskell to JavaScript compiler
  .
