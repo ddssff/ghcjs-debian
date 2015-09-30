@@ -77,35 +77,48 @@ parseLib s =
            "libghcjs-" <> map toLower name <> "-dev-" <> ver <> "-" <> chk]
       _ -> []
 
--- | Strip the prefix containing $PWD from the paths in the wrapper scripts,
--- leaving paths starting with /usr/lib/ghcjs.
+-- | Strip the prefix containing $PWD from the paths in the wrapper
+-- scripts, leaving paths starting with /usr/lib/ghcjs.  Also, built
+-- the ghcjs.links file.  This is not used because we can't actually
+-- build in a location different from the eventual install, but maybe
+-- someday...
 editWrappers :: String -> String -> IO ()
-editWrappers old new =
-    getDirectoryContents dir >>= mapM_ doFile
+editWrappers build homeRelative =
+    getDirectoryContents bin >>= mapM_ doFile
     where
-      dir = "usr/lib/ghcjs/.cabal/bin"
+      home = "/" <> homeRelative
+      bin = home <> "/.cabal/bin"
       doFile linkname =
-          (try . readSymbolicLink) (dir <> "/" <> linkname) >>=
+          (try . readSymbolicLink) (bin <> "/" <> linkname) >>=
           either (\(_ :: IOError) -> return ()) (doLink linkname)
-      doLink linkname linktext = do
-        ln ("/" <> dir <> "/" <> linkname) ("/" <> dir <> "/" <> linktext)
-        ln ("/usr/bin/" <> linkname) ("/" <> dir <> "/" <> linktext)
+      doLink linkname linktext =
         editWrapper linkname linktext
-
-      ln linktext linkpath = appendFile "debian/ghcjs.links" (linkpath <> " " <> linktext <> "\n")
 
       editWrapper :: String -> String -> IO ()
       editWrapper "ghcjs-boot" _ = return () -- not a wrapper
       editWrapper "ghcjs-run" _ = return () -- not a wrapper
       editWrapper _ linktext =
-          readFile (dir <> "/" <> linktext) >>= replaceFile (dir <> "/" <> linktext) . fixPaths
+          readFile (bin <> "/" <> linktext) >>= replaceFile (bin <> "/" <> linktext) . fixPaths
 
       -- Remove prefix $HOME from wrapper script paths
       fixPaths :: String -> String
       fixPaths [] = []
-      fixPaths s | isPrefixOf new s = new <> fixPaths (drop (length new) s)
-      fixPaths s | isPrefixOf old s = new <> fixPaths (drop (length old) s)
+      fixPaths s | isPrefixOf home s = home <> fixPaths (drop (length (home)) s)
+      fixPaths s | isPrefixOf build s = home <> fixPaths (drop (length build) s)
       fixPaths (c:s) = c : fixPaths s
+
+buildLinks :: String -> IO ()
+buildLinks home =
+    getDirectoryContents bin >>= mapM_ doFile
+    where
+      bin = home <> "/.cabal/bin"
+      doFile linkname =
+          (try . readSymbolicLink) (bin <> "/" <> linkname) >>=
+          either (\(_ :: IOError) -> return ()) (doLink linkname)
+      doLink linkname linktext = do
+        ln (bin <> "/" <> linkname) (bin <> "/" <> linktext)
+        ln ("/usr/bin/" <> linkname) (bin <> "/" <> linktext)
+      ln linktext linkpath = appendFile "debian/ghcjs.links" (linkpath <> " " <> linktext <> "\n")
 
 -- | Replace a file's contents, accounting for the possibility that the
 -- old contents of the file may still be being read.
