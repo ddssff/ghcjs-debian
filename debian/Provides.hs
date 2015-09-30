@@ -140,7 +140,7 @@ buildTriggers :: String -> IO ()
 buildTriggers home = do
   ghcjsVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-version"] mempty
   ghcjsGhcVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-ghc-version"] mempty
-  writeFile "debian/ghcjs.triggers" ("interest " <> home <> "/.ghcjs/" <> intercalate "-" [arch, os, ghcjsVersion, ghcjsGhcVersion] <> "/ghcjs/package.conf.d")
+  writeFile "debian/ghcjs.triggers" ("interest " <> home <> "/.ghcjs/" <> intercalate "-" [arch, os, ghcjsVersion, ghcjsGhcVersion] <> "/ghcjs/package.conf.d\n")
 
 -- | Replace a file's contents, accounting for the possibility that the
 -- old contents of the file may still be being read.
