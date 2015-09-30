@@ -1,23 +1,34 @@
 #!/usr/bin/make -f
 
-DEB_DH_SHLIBDEPS_ARGS += -Xusr/lib/ghcjs/.ghcjs -XlibHSghcjs
+# It would be nice to build ghcjs inside our current directory,
+# but the path gets recorded in the result.  Try it.
+# TOP := $(PWD)
+TOP := /
+HOMEREL := usr/lib/ghcjs
+HOME := $(TOP)$(HOMEREL)
+PATH := $(HOME)/.cabal/bin:$(PATH)
+DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
 
-configure/ghcjs::
-	echo "interest /usr/lib/ghcjs/.ghcjs/$(shell ghc -e 'putStr System.Info.arch')-$(shell ghc -e 'putStr System.Info.os')-$(shell ghcjs --numeric-version)-$(shell ghcjs --numeric-ghc-version)/ghcjs/package.conf.d" > debian/ghcjs.triggers
-
 build/ghcjs:: debian/ghcjs-build-stamp
 
+# The result of this build is in /usr/lib/ghcjs.
 debian/ghcjs-build-stamp:
-	. debian/boot
+	mkdir -p $(HOME)
+	cabal update
+	rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs ghcjs
+	cabal install ./ghcjs
+	# Now ghcjs exists and should be in the path, we can ask its version
+	echo "interest /$(HOMEREL)/.ghcjs/$(shell ghc -e 'putStr System.Info.arch')-$(shell ghc -e 'putStr System.Info.os')-$(shell ghcjs --numeric-version)-$(shell ghcjs --numeric-ghc-version)/ghcjs/package.conf.d" > debian/ghcjs.triggers
+	ghcjs-boot --dev --with-node /usr/bin/nodejs
 	touch $@
 
 install/ghcjs:: debian/ghcjs-binary-stamp
 
 debian/ghcjs-binary-stamp:
-	runhaskell -idebian debian/Provides.hs
+	runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
 	touch $@
 
 clean::
