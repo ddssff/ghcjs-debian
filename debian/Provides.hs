@@ -6,33 +6,35 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wall #-}
 
-import Control.Exception (try)
-import Control.Monad.Trans (MonadIO)
+import Control.Exception as E (catch, try)
+import Control.Monad.Trans (liftIO, MonadIO)
 import Data.Char (toLower)
 import Data.List as List (intercalate, isPrefixOf, lines)
+import Data.ListLike as LL ()
+import Data.ListLike.IO as LL (hPutStr, ListLikeIO, writeFile)
 import Data.Monoid ((<>))
 import Data.Text as Text (Text)
-import Shelly
-import System.Environment (setEnv)
+import Prelude hiding (writeFile)
+import System.Directory (getDirectoryContents, removeFile)
+import System.Environment (getArgs, setEnv)
 import System.FilePath (takeDirectory)
 import System.Process (readProcess)
-import Text.Regex.TDFA
-import ReplaceFile (replaceFile)
-import System.Directory (getDirectoryContents)
 import System.Environment (getEnv)
-import System.Posix.Files (readSymbolicLink)
+import System.IO as IO (Handle, IOMode(WriteMode), openFile)
+import System.IO.Error (isDoesNotExistError)
+import System.Posix.Files (getSymbolicLinkStatus, getFdStatus, fileMode, readSymbolicLink, setFdMode)
+import System.Posix.IO (handleToFd, closeFd)
+import System.Posix.Types (FileMode)
+import Text.Regex.TDFA
 
 -- I've never seen this either.  I can only guess what it does.
 default (Text)
 
-homeRelative :: String
-homeRelative = "usr/lib/ghcjs"
-
-homeAbsolute :: String
-homeAbsolute = "/" <> homeRelative
-
 main :: IO ()
 main = do
+  [top, homeRelative] <- getArgs
+  let homeAbsolute = top <> homeRelative
+
   build <- (++ homeAbsolute) <$> getEnv "PWD"
   setEnv "HOME" build
 
@@ -104,3 +106,26 @@ editWrappers old new =
       fixPaths s | isPrefixOf new s = new <> fixPaths (drop (length new) s)
       fixPaths s | isPrefixOf old s = new <> fixPaths (drop (length old) s)
       fixPaths (c:s) = c : fixPaths s
+
+-- | Replace a file's contents, accounting for the possibility that the
+-- old contents of the file may still be being read.
+replaceFile :: forall full item. (ListLikeIO full item, Eq full) => FilePath -> full -> IO ()
+replaceFile path text =
+    (getSymbolicLinkStatus path >>= return . fileMode >>= \mode ->
+     removeFile path >> writeFileAndFixMode (const mode) path text)
+        `E.catch` (\ e -> if isDoesNotExistError e then writeFile path text else ioError e)
+
+-- | Write a file and make it readable
+writeFileAndFixMode :: forall full item. (ListLikeIO full item, Eq full) => (FileMode -> FileMode) -> FilePath -> full -> IO ()
+writeFileAndFixMode fixmode path bytes = do
+  fp <- IO.openFile path IO.WriteMode
+  hPutStr fp bytes
+  setModeAndClose fixmode fp
+
+setModeAndClose :: (FileMode -> FileMode) -> IO.Handle -> IO ()
+setModeAndClose modefn fp = do
+  -- This closes the handle (but not the fd)
+  fd <- handleToFd fp
+  mode <- fileMode <$> getFdStatus fd
+  setFdMode fd (modefn mode)
+  closeFd fd
