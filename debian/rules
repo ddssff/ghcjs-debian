@@ -21,4 +21,4 @@ debian/ghcjs-binary-stamp:
 	touch $@
 
 clean::
-	rm -rf usr ghcjs debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.links debian/ghcjs.substvars debian/ghcjs.triggers
+	rm -rf $(TOP)$(HOMEREL) usr ghcjs debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.links debian/ghcjs.substvars debian/ghcjs.triggers
