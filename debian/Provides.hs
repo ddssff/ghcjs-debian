@@ -33,23 +33,37 @@ default (Text)
 main :: IO ()
 main = do
   [top, homeRelative] <- getArgs
-  let homeAbsolute = top <> homeRelative
+  let home = "/" <> homeRelative  -- where the build will eventually end up
+      build = top <> homeRelative -- where we will actually create the build
 
-  build <- (++ homeAbsolute) <$> getEnv "PWD"
   setEnv "HOME" build
 
-  -- For debugging, reverse the edits on the wrappers so they work "in
-  -- place".
-  editWrappers homeAbsolute build
-
-  -- Make sure the new ghcjs binaries are in the PATH
-  modifyEnv "PATH" ((build <> "/.cabal/bin:") <>)
-
+  readProcess "mkdir" ["-p", "usr/lib"] mempty
+  readProcess "rsync" ["-aHxS", "--delete", (home <> "/"), "usr/lib/ghcjs"] mempty
+  findAndRemove homeRelative ["*/config.guess",
+                              "*/config.sub",
+                              "*/ghcjs-boot",
+                              "*/packages/hackage.haskell.org",
+                              "*/.cabal/logs",
+                              "*/.cabal/lib",
+                              "*/.cabal/packages",
+                              "*/.cabal/setup-exe-cache",
+                              "*/.cabal/share",
+                              "*/.ghc",
+                              "*/.git"]
   readProcess "find" [homeRelative, "-type", "f"] mempty >>=
-    liftIO . writeFile "debian/ghcjs.install" . unlines . map (\ s -> s <> " " <> (takeDirectory $ s)) . lines
+    writeFile "debian/ghcjs.install" . unlines . map formatInstallLine . lines
 
   compilerProvides
-  editWrappers build homeAbsolute
+  buildLinks home
+
+formatInstallLine :: String -> String
+formatInstallLine s = "/" <> s <> " " <> ("/" <> takeDirectory s)
+
+findAndRemove :: FilePath -> [String] -> IO ()
+findAndRemove top patterns =
+    readProcess "find" (top : intercalate ["-o"] (map (\x -> ["-path", x]) patterns)) mempty >>=
+    mapM_ (\x -> readProcess "rm" ["-rf", x] mempty) . lines
 
 modifyEnv :: String -> (String -> String) -> IO ()
 modifyEnv var f = getEnv var >>= \old -> setEnv var (f old)
