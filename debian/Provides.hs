@@ -20,6 +20,7 @@ import System.Environment (getArgs, setEnv)
 import System.FilePath (takeDirectory)
 import System.Process (readProcess)
 import System.Environment (getEnv)
+import System.Info (arch, os)
 import System.IO as IO (Handle, IOMode(WriteMode), openFile)
 import System.IO.Error (isDoesNotExistError)
 import System.Posix.Files (getSymbolicLinkStatus, getFdStatus, fileMode, readSymbolicLink, setFdMode)
@@ -55,6 +56,7 @@ main = do
     writeFile "debian/ghcjs.install" . unlines . map formatInstallLine . lines
 
   compilerProvides
+  buildTriggers home
   buildLinks home
 
 formatInstallLine :: String -> String
@@ -133,6 +135,12 @@ buildLinks home =
         ln (bin <> "/" <> linkname) (bin <> "/" <> linktext)
         ln ("/usr/bin/" <> linkname) (bin <> "/" <> linktext)
       ln linktext linkpath = appendFile "debian/ghcjs.links" (linkpath <> " " <> linktext <> "\n")
+
+buildTriggers :: String -> IO ()
+buildTriggers home = do
+  ghcjsVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-version"] mempty
+  ghcjsGhcVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-ghc-version"] mempty
+  writeFile "debian/ghcjs.triggers" ("interest " <> home <> "/.ghcjs/" <> intercalate "-" [arch, os, ghcjsVersion, ghcjsGhcVersion] <> "/ghcjs/package.conf.d")
 
 -- | Replace a file's contents, accounting for the possibility that the
 -- old contents of the file may still be being read.

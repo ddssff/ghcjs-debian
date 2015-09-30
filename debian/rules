@@ -21,7 +21,6 @@ debian/ghcjs-build-stamp:
 	rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs ghcjs
 	cabal install ./ghcjs
 	# Now ghcjs exists and should be in the path, we can ask its version
-	echo "interest /$(HOMEREL)/.ghcjs/$(shell ghc -e 'putStr System.Info.arch')-$(shell ghc -e 'putStr System.Info.os')-$(shell ghcjs --numeric-version)-$(shell ghcjs --numeric-ghc-version)/ghcjs/package.conf.d" > debian/ghcjs.triggers
 	ghcjs-boot --dev --with-node /usr/bin/nodejs
 	touch $@
 
