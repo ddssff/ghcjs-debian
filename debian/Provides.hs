@@ -7,6 +7,7 @@
 {-# OPTIONS_GHC -Wall #-}
 
 import Control.Exception as E (catch, try)
+import Control.Monad (when)
 import Control.Monad.Trans (liftIO, MonadIO)
 import Data.Char (toLower)
 import Data.List as List (intercalate, isPrefixOf, lines)
@@ -39,8 +40,10 @@ main = do
 
   setEnv "HOME" build
 
-  readProcess "mkdir" ["-p", "usr/lib"] mempty
-  readProcess "rsync" ["-aHxS", "--delete", (home <> "/"), "usr/lib/ghcjs"] mempty
+  when (home /= build) (editWrappers home build)
+
+  _ <- readProcess "mkdir" ["-p", "usr/lib"] mempty
+  _ <- readProcess "rsync" ["-aHxS", "--delete", (home <> "/"), "usr/lib/ghcjs"] mempty
   findAndRemove homeRelative ["*/config.guess",
                               "*/config.sub",
                               "*/ghcjs-boot",
@@ -58,6 +61,8 @@ main = do
   compilerProvides
   buildTriggers home
   buildLinks home
+
+  when (home /= build) (editWrappers build home)
 
 formatInstallLine :: String -> String
 formatInstallLine s = "/" <> s <> " " <> ("/" <> takeDirectory s)
