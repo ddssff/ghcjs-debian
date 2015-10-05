@@ -18,10 +18,11 @@ build/ghcjs:: debian/ghcjs-build-stamp
 debian/ghcjs-build-stamp:
 	mkdir -p $(HOME)
 	cabal update
-	rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs ghcjs
+	rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs -b old-base-ghc-7.10 ghcjs
 	cabal install ./ghcjs
 	# Now ghcjs exists and should be in the path, we can ask its version
-	ghcjs-boot --dev --with-node /usr/bin/nodejs
+	ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch old-base-ghc-7.10
+	# cd /usr/lib; rm -rf ghcjs; tar xfz /home/dsf/git/ghcjs-debian-1.tar.gz
 	touch $@
 
 install/ghcjs:: debian/ghcjs-binary-stamp
