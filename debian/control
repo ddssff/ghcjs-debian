@@ -2,7 +2,7 @@ Source: ghcjs
 Priority: optional
 Section: devel
 Maintainer: David Fox <dsf@seereason.com>
-Build-Depends: happy, alex, cabal-install, git, ghc (>= 7.10.2), nodejs, autoconf,
+Build-Depends: happy, alex, cdbs, cabal-install, git, ghc (>= 7.10.2), nodejs, autoconf,
                libghc-shelly-dev, libghc-regex-tdfa-dev, libghc-text-dev
 
 Package: ghcjs
