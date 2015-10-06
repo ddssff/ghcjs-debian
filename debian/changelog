@@ -1,8 +1,8 @@
-ghcjs (0.2.0-1) unstable; urgency=low
+ghcjs (0.1.0-3) unstable; urgency=low
 
-  * improved-base
+  * Branch for old-base-ghc-7.10
 
- -- David Fox <dsf@seereason.com>  Tue, 29 Sep 2015 08:29:33 -0700
+ -- David Fox <dsf@seereason.com>  Tue, 06 Oct 2015 09:16:19 -0700
 
 ghcjs (0.1.0-2) unstable; urgency=low
 
