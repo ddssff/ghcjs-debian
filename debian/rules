@@ -18,8 +18,8 @@ build/ghcjs:: debian/ghcjs-build-stamp
 debian/ghcjs-build-stamp:
 	mkdir -p $(HOME)
 	cabal update
-	rm -rf ghcjs && git clone https://github.com/NewByteOrder/ghcjs ghcjs
-	cabal install ./ghcjs
+	rm -rf ghcjs && git clone git@github.com:NewByteOrder/ghcjs ghcjs
+	cabal install ./ghcjs --force-reinstalls
 	# Now ghcjs exists and should be in the path, we can ask its version
 	ghcjs-boot --dev --with-node /usr/bin/nodejs
 	touch $@
