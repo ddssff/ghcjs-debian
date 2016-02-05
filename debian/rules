@@ -20,7 +20,9 @@ debian/ghcjs-build-stamp:
 	cabal update
 	rm -rf ghcjs
 	# git clone git@github.com:ghcjs/ghcjs
+	# git clone https://github.com/ddssff/ghcjs --branch ghcjsi ghcjs
 	git clone git@github.com:NewByteOrder/ghcjs --branch nbo-freeze
+	# cabal install ./ghcjs
 	cabal install ./ghcjs --force-reinstalls
 	# Now ghcjs exists and should be in the path, we can ask its version
 	ghcjs-boot --dev --with-node /usr/bin/nodejs
