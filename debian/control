@@ -3,7 +3,10 @@ Priority: optional
 Section: devel
 Maintainer: David Fox <dsf@seereason.com>
 Build-Depends: happy, alex, cdbs, cabal-install, git, ghc (>= 7.10.2), nodejs, autoconf,
-               libghc-shelly-dev, libghc-regex-tdfa-dev, libghc-text-dev
+               libghc-shelly-dev, libghc-regex-tdfa-dev, libghc-text-dev, libghc-ghc-paths-dev,
+               libghc-haddock-api-dev, libghc-src-exts-dev, libghc-src-meta-dev,
+               libghc-optparse-applicative-dev, libghc-stringsearch-dev,
+               libghc-syb-dev, libghc-wl-pprint-text-dev, libghc-yaml-dev, libghc-http-dev
 
 Package: ghcjs
 Architecture: any
