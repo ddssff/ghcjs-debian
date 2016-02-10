@@ -1,3 +1,10 @@
+ghcjs (0.2.0.20151020-1) unstable; urgency=low
+
+  * Pull in fix for issue #453.
+  * Match version number in ghcjs.cabal
+
+ -- David Fox <dsf@seereason.com>  Wed, 10 Feb 2016 04:49:37 -0800
+
 ghcjs (0.2.0-1) unstable; urgency=low
 
   * improved-base
