@@ -6,7 +6,8 @@ Build-Depends: happy, alex, cdbs, cabal-install, git, ghc (>= 7.10.2), nodejs, a
                libghc-shelly-dev, libghc-regex-tdfa-dev, libghc-text-dev, libghc-ghc-paths-dev,
                libghc-haddock-api-dev, libghc-src-exts-dev, libghc-src-meta-dev,
                libghc-optparse-applicative-dev, libghc-stringsearch-dev,
-               libghc-syb-dev, libghc-wl-pprint-text-dev, libghc-yaml-dev, libghc-http-dev
+               libghc-syb-dev, libghc-wl-pprint-text-dev, libghc-yaml-dev, libghc-http-dev,
+               libghc-executable-path-dev, libghc-tar-dev, libghc-text-binary-dev
 
 Package: ghcjs
 Architecture: any
