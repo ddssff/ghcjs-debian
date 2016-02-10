@@ -19,52 +19,8 @@ debian/ghcjs-build-stamp:
 	mkdir -p $(HOME)
 	cabal update
 	rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs ghcjs
-	for i in \
-          libghc-aeson-qq-dev \
-          libghc-appraisalscribe-data-dev \
-          libghc-appraisalscribe-dev \
-          libghc-appraisalscribe-paths-dev \
-          libghc-authenticate-dev \
-          libghc-clckwrks-dev \
-          libghc-clckwrks-plugin-page-dev \
-          libghc-clckwrks-plugin-stripe-dev \
-          libghc-clckwrks-theme-appraisalscribe-dev \
-          libghc-fb-dev \
-          libghc-happstack-authenticate-dev \
-          libghc-happstack-authenticate-dev \
-          libghc-happstack-foundation-dev \
-          libghc-happstack-ghcjs-webmodule-dev \
-          libghc-happstack-hsp-dev \
-          libghc-happstack-jmacro-dev \
-          libghc-hsx2hs-dev \
-          libghc-hsx-jmacro-dev \
-          libghc-http-streams-dev \
-          libghc-image-cache-dev \
-          libghc-jmacro-dev \
-          libghc-jwt-dev \
-          libghc-pandoc-dev \
-          libghc-pandoc-types-dev \
-          libghc-reform-hsp-dev \
-          libghc-servant-dev \
-          libghc-servant-server-dev \
-          libghc-shakespeare-dev \
-          libghc-stripe-core-dev \
-          libghc-stripe-http-streams-dev \
-          libghc-texmath-dev \
-          libghc-th-alpha-dev \
-          libghc-th-context-dev \
-          libghc-th-desugar-dev \
-          libghc-th-kinds-fork-dev \
-          libghc-th-path-dev \
-          libghc-th-reify-many-dev \
-          libghc-th-typegraph-dev \
-          libghc-userid-dev \
-          libghc-wai-app-static-dev \
-          libghc-wai-extra-dev \
-          libghc-yaml-dev; do apt-get remove --force-yes $i || true; done
-
 	# cabal install ghcjs/lib/ghcjs-prim
-	cabal install ./ghcjs
+	cabal install ./ghcjs --force-reinstalls
 	# Now ghcjs exists and should be in the path, we can ask its version
 	ghcjs-boot --dev
 	touch $@
