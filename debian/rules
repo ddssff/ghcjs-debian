@@ -19,7 +19,7 @@ debian/ghcjs-build-stamp:
 	mkdir -p $(HOME)
 	cabal update
 	rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs ghcjs
-	apt-get remove --force-yes \
+	for i in \
           libghc-aeson-qq-dev \
           libghc-appraisalscribe-data-dev \
           libghc-appraisalscribe-dev \
@@ -61,7 +61,8 @@ debian/ghcjs-build-stamp:
           libghc-userid-dev \
           libghc-wai-app-static-dev \
           libghc-wai-extra-dev \
-          libghc-yaml-dev
+          libghc-yaml-dev; do apt-get remove --force-yes $i || true; done
+
 	# cabal install ghcjs/lib/ghcjs-prim
 	cabal install ./ghcjs
 	# Now ghcjs exists and should be in the path, we can ask its version
