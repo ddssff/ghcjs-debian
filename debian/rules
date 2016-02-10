@@ -17,10 +17,13 @@ build/ghcjs:: debian/ghcjs-build-stamp
 # The result of this build is in /usr/lib/ghcjs.
 debian/ghcjs-build-stamp:
 	mkdir -p $(HOME)
+	-apt-get remove ghcjs --force-yes
 	cabal update
-	rm -rf ghcjs && git clone https://github.com/NewByteOrder/ghcjs ghcjs
+	-rm -r ghcjs
+	git clone https://github.com/NewByteOrder/ghcjs ghcjs
 	# cabal install ghcjs/lib/ghcjs-prim
-	cabal install ./ghcjs --force-reinstalls
+	cd ghcjs && cabal configure && cabal build
+	cabal install ./ghcjs
 	# Now ghcjs exists and should be in the path, we can ask its version
 	ghcjs-boot --dev
 	touch $@
