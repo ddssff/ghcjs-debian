@@ -17,6 +17,7 @@ build/ghcjs:: debian/ghcjs-build-stamp
 # The result of this build is in /usr/lib/ghcjs.
 debian/ghcjs-build-stamp:
 	mkdir -p $(HOME)
+	mkdir -p /usr/share/haddock-api # Prevent "Haddock's resource directory (/usr/share/haddock-api) does not exist!" error
 	-apt-get remove ghcjs --force-yes
 	cabal update
 	-rm -r ghcjs
