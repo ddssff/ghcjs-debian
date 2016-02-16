@@ -1,13 +1,10 @@
 --- old/ghcjs/lib/etc/boot.yaml	2016-02-09 22:16:51.734534902 -0800
 +++ new/ghcjs/lib/etc/boot.yaml	2016-02-16 10:24:55.942085674 -0800
-@@ -35,8 +35,8 @@
-   # GHCJS calls GHC for anything that depends on them
+@@ -36,7 +36,6 @@
    # (these must be installed in the GHC installation used for booting)
  
--  stage1PretendToHave:
+   stage1PretendToHave:
 -    - Cabal
-+  # stage1PretendToHave:
-+  #   - Cabal
  
    # in stage 1a, we cannot do linking yet, ghc-prim is installed
    # before this
