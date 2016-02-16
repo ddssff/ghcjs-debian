@@ -1,12 +1,11 @@
---- old/ghcjs/lib/etc/boot.yaml	2016-02-09 22:16:51.734534902 -0800
-+++ new/ghcjs/lib/etc/boot.yaml	2016-02-16 10:24:55.942085674 -0800
-@@ -35,8 +35,7 @@
-   # GHCJS calls GHC for anything that depends on them
-   # (these must be installed in the GHC installation used for booting)
- 
--  stage1PretendToHave:
--    - Cabal
-+  stage1PretendToHave: []
- 
-   # in stage 1a, we cannot do linking yet, ghc-prim is installed
-   # before this
+--- old/ghcjs/src-bin/Boot.hs	2016-02-16 11:49:07.026054820 -0800
++++ new/ghcjs/src-bin/Boot.hs	2016-02-16 11:49:37.882054632 -0800
+@@ -304,7 +304,7 @@
+       installFakes
+       installStage1
+       unless (e ^. beSettings . bsStage1Unbooted) $ do
+-        removeFakes
++        -- removeFakes
+         unless (e ^. beSettings . bsQuick) installStage2
+       when (e ^. beSettings . bsHaddock) buildDocIndex
+       liftIO . printBootEnvSummary True =<< ask
