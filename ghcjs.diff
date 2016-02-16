@@ -9,3 +9,12 @@
          unless (e ^. beSettings . bsQuick) installStage2
        when (e ^. beSettings . bsHaddock) buildDocIndex
        liftIO . printBootEnvSummary True =<< ask
+@@ -802,7 +802,7 @@
+ installStage2 :: B ()
+ installStage2 = subTop' "ghcjs-boot" $ do
+   msg info "installing Cabal library"
+-  removeFakes
++  -- removeFakes
+   cabalPkg <- view (beStages . bstCabal)
+   preparePackage cabalPkg
+   cabalInstall [cabalPkg]
