@@ -19,6 +19,7 @@ debian/ghcjs-build-stamp:
 	mkdir -p $(HOME)
 	cabal update
 	rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs ghcjs
+	patch -p1 < ghcjs.diff
 	sudo apt-get remove --force-yes \
           libghc-aeson-qq-dev \
           libghc-appraisalscribe-data-dev \
