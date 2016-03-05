@@ -23,7 +23,6 @@ debian/ghcjs-build-stamp:
 	cabal update
 	-rm -r ghcjs
 	git clone https://github.com/ddssff/ghcjs ghcjs
-	patch -p1 < ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
 	cd ghcjs && cabal configure && cabal build
 	cabal install ./ghcjs
