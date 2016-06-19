@@ -15,6 +15,7 @@ import Data.ListLike as LL ()
 import Data.ListLike.IO as LL (hPutStr, ListLikeIO, writeFile)
 import Data.Monoid ((<>))
 import Data.Text as Text (Text)
+import Debug.Trace (trace)
 import Prelude hiding (writeFile)
 import System.Directory (getDirectoryContents, removeFile)
 import System.Environment (getArgs, setEnv)
@@ -92,11 +93,11 @@ providesLine libs = "haskell:Provides=" ++ intercalate ", " libs ++ "\n"
 
 parseLib :: String -> [String]
 parseLib s =
-    case s =~ ("^.*\\((.*)-([0-9.]*)-(.....)...........................\\)$" :: String) :: (String, String, String, [String]) of
+    case s =~ ("^.*\\((.*)-([0-9.]*)-(.....).................\\)$" :: String) :: (String, String, String, [String]) of
       (_, _, _, [name,ver,chk]) ->
           ["libghcjs-" <> map toLower name <> "-dev",
            "libghcjs-" <> map toLower name <> "-dev-" <> ver <> "-" <> chk]
-      _ -> []
+      _ -> trace ("Could not parse: " ++ show s) []
 
 -- | Strip the prefix containing $PWD from the paths in the wrapper
 -- scripts, leaving paths starting with /usr/lib/ghcjs.  Also, built
