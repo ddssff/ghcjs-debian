@@ -1,3 +1,9 @@
+ghcjs (0.2.1) unstable; urgency=low
+
+  * New upstream release
+
+ -- David Fox <dsf@seereason.com>  Mon, 21 Nov 2016 09:42:00 -0800
+
 ghcjs (0.2.0.20151020-1) unstable; urgency=low
 
   * Pull in fix for issue #453.

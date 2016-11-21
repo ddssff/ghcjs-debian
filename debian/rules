@@ -1,41 +1,58 @@
 #!/usr/bin/make -f
 
-# It would be nice to build ghcjs inside our current directory,
-# but the path gets recorded in the result.  Try it.
+# It would be nice to build ghcjs inside our current directory, but
+# the path gets recorded in the result.  So TOP needs to be "/".
 # TOP := $(PWD)
 TOP := /
-HOMEREL := usr/lib/ghcjs
-HOME := $(TOP)$(HOMEREL)
-PATH := $(HOME)/.cabal/bin:$(PATH)
+
+# This should be one of HVR's compiler versions, 8 or newer.
+GHCVER := 8.0.1
+BRANCH := ghc-8.0
+NAME := ghcjs-$(GHCVER)
+HOMEREL := usr/lib/$(NAME)
+# This was HOME, but that meant all the cabal packages got installed
+# in /usr/lib/ghcjs-8.0.2, and were then wiped out on each run.  But I
+# seem to recall that the ghcjs build requires HOME to be set, so we
+# will see.
+HOMEABS := $(TOP)$(HOMEREL)
+PATH := $(HOMEABS)/.cabal/bin:/opt/ghc/$(GHCVER)/bin:/opt/cabal/1.24/bin:/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:$(PATH)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
+
+# HOME := $(HOMEABS)
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
 
-build/ghcjs:: debian/ghcjs-build-stamp
+build/$(NAME):: debian/$(NAME)-build-stamp
 
 # The result of this build is in /usr/lib/ghcjs.
-debian/ghcjs-build-stamp:
-	mkdir -p $(HOME)
-	mkdir -p /usr/share/haddock-api  # Prevent "Haddock's resource directory (/usr/share/haddock-api) does not exist!" error
-	rsync -aHxS --delete /usr/lib/ghc/html/ /usr/share/haddock-api/html
-	-apt-get remove ghcjs --force-yes
-	cabal update
-	-rm -r ghcjs
-	git clone https://github.com/ghcjs/ghcjs ghcjs
+debian/$(NAME)-build-stamp:
+	mkdir -p $(HOMEABS)
+	mkdir -p /usr/share/haddock-api  # Prevent error "Haddock's resource directory (/usr/share/haddock-api) does not exist!"
+	rsync -aHxS --delete /opt/ghc/$(GHCVER)/lib/ghc-$(GHCVER)/html/ /usr/share/haddock-api/html
+	-apt-get remove $(NAME) --yes --force-yes
+	PATH=$(PATH) cabal update
+	-rm -r $(NAME)
+	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(NAME)
 	# cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
-	cd ghcjs && cabal configure && cabal build
-	cabal install ./ghcjs
+	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
+	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.1 && cabal install; }; } || true
+	PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
+	PATH=$(PATH) && cd $(NAME) && cabal configure
+	PATH=$(PATH) && cd $(NAME) && cabal build
+	# Install into /usr/lib/ghcjs-8.0.2 rather than $HOME
+	PATH=$(PATH) && HOME=$(HOMEABS) && cabal install ./$(NAME)
 	# Now ghcjs exists and should be in the path, we can ask its version
-	ghcjs-boot --dev
+	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.0 --shims-dev-branch ghc-8.0
 	touch $@
 
-install/ghcjs:: debian/ghcjs-binary-stamp
+install/$(NAME):: debian/$(NAME)-binary-stamp
 
-debian/ghcjs-binary-stamp:
-	runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
+debian/$(NAME)-binary-stamp:
+	PATH=$(PATH) && cabal install ListLike regex-tdfa
+	PATH=$(PATH) && runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL) $(GHCVER)
 	touch $@
 
 clean::
-	rm -rf $(TOP)$(HOMEREL) usr ghcjs debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.links debian/ghcjs.substvars debian/ghcjs.triggers
+	rm -rf $(TOP)$(HOMEREL) usr ghcjs-[78]* debian/$(NAME)-build-stamp debian/$(NAME)-binary-stamp debian/$(NAME).install debian/$(NAME).links debian/$(NAME).substvars debian/$(NAME).triggers haddock-api-2.17.3/dist shelly-1.6.8.1/dist

@@ -1,7 +1,7 @@
 -- | Install (binary) tasks:
---     write debian/ghcjs.substvars
---     write debian/ghcjs.install
---     Fix the wrapper paths in usr/lib/ghcjs/.cabal/bin:
+--     write debian/ghcjs-8.0.substvars
+--     write debian/ghcjs-8.0.install
+--     Fix the wrapper paths in usr/lib/ghcjs-8.0.2/.cabal/bin:
 --        ghcjs, ghcjs-boot, ghcjs-run, haddock-ghcjs, hsc2hs-ghcjs
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wall #-}
@@ -33,9 +33,13 @@ import Text.Regex.TDFA
 -- I've never seen this either.  I can only guess what it does.
 default (Text)
 
+-- Usage: runhaskell -idebian Provides.hs "/" "usr/lib/ghcjs-8.0.2" "8.0.2"
+--
+-- At this time, the first argument must be "/" - trying to build in a
+-- different location will result in a broken compiler.
 main :: IO ()
 main = do
-  [top, homeRelative] <- getArgs
+  [top, homeRelative, ghcver] <- getArgs
   let home = "/" <> homeRelative  -- where the build will eventually end up
       build = top <> homeRelative -- where we will actually create the build
 
@@ -44,7 +48,7 @@ main = do
   when (home /= build) (editWrappers home build)
 
   _ <- readProcess "mkdir" ["-p", "usr/lib"] mempty
-  _ <- readProcess "rsync" ["-aHxS", "--delete", (home <> "/"), "usr/lib/ghcjs"] mempty
+  _ <- readProcess "rsync" ["-aHxS", "--delete", (home <> "/"), homeRelative] mempty
   findAndRemove homeRelative ["*/config.guess",
                               "*/config.sub",
                               "*/ghcjs-boot",
@@ -57,11 +61,11 @@ main = do
                               "*/.ghc",
                               "*/.git"]
   readProcess "find" [homeRelative, "-type", "f"] mempty >>=
-    writeFile "debian/ghcjs.install" . unlines . map formatInstallLine . lines
+    writeFile ("debian/ghcjs-" <> ghcver <> ".install") . unlines . map formatInstallLine . lines
 
-  compilerProvides
-  buildTriggers home
-  buildLinks home
+  compilerProvides ghcver
+  buildTriggers home ghcver
+  buildLinks home ghcver
 
   when (home /= build) (editWrappers build home)
 
@@ -69,8 +73,8 @@ formatInstallLine :: String -> String
 formatInstallLine s = "/" <> s <> " " <> ("/" <> takeDirectory s)
 
 findAndRemove :: FilePath -> [String] -> IO ()
-findAndRemove top patterns =
-    readProcess "find" (top : intercalate ["-o"] (map (\x -> ["-path", x]) patterns)) mempty >>=
+findAndRemove homeRelative patterns =
+    readProcess "find" (homeRelative : intercalate ["-o"] (map (\x -> ["-path", x]) patterns)) mempty >>=
     mapM_ (\x -> readProcess "rm" ["-rf", x] mempty) . lines
 
 modifyEnv :: String -> (String -> String) -> IO ()
@@ -80,10 +84,10 @@ modifyEnv var f = getEnv var >>= \old -> setEnv var (f old)
 -- | Use ghcjs-pkg to find the list of libraries built into ghcjs,
 -- turn them into debian virtual package names, and build an
 -- assignment to shell variable haskell:Provides.  That goes into the
--- ghcjs.substvars file.  There may already be something there by the
+-- ghcjs-8.0.2.substvars file.  There may already be something there by the
 -- time this is called, so we append.  So, not idempotent.
-compilerProvides :: MonadIO m => m ()
-compilerProvides = liftIO $ compilerLibs >>= appendFile "debian/ghcjs.substvars" . providesLine
+compilerProvides :: MonadIO m => String -> m ()
+compilerProvides ghcver = liftIO $ compilerLibs >>= appendFile ("debian/ghcjs-" <> ghcver <> ".substvars") . providesLine
 
 compilerLibs :: IO [String]
 compilerLibs = (concatMap parseLib . List.lines) <$> readProcess "ghcjs-pkg" ["list", "-v2"] ""
@@ -100,8 +104,8 @@ parseLib s =
       _ -> trace ("Could not parse: " ++ show s) []
 
 -- | Strip the prefix containing $PWD from the paths in the wrapper
--- scripts, leaving paths starting with /usr/lib/ghcjs.  Also, built
--- the ghcjs.links file.  This is not used because we can't actually
+-- scripts, leaving paths starting with /usr/lib/ghcjs-8.0.2.  Also, built
+-- the ghcjs-8.0.2.links file.  This is not used because we can't actually
 -- build in a location different from the eventual install, but maybe
 -- someday...
 editWrappers :: String -> String -> IO ()
@@ -129,8 +133,8 @@ editWrappers build homeRelative =
       fixPaths s | isPrefixOf build s = home <> fixPaths (drop (length build) s)
       fixPaths (c:s) = c : fixPaths s
 
-buildLinks :: String -> IO ()
-buildLinks home =
+buildLinks :: String -> String -> IO ()
+buildLinks home ghcver =
     getDirectoryContents bin >>= mapM_ doFile
     where
       bin = home <> "/.cabal/bin"
@@ -140,13 +144,13 @@ buildLinks home =
       doLink linkname linktext = do
         ln (bin <> "/" <> linkname) (bin <> "/" <> linktext)
         ln ("/usr/bin/" <> linkname) (bin <> "/" <> linktext)
-      ln linktext linkpath = appendFile "debian/ghcjs.links" (linkpath <> " " <> linktext <> "\n")
+      ln linktext linkpath = appendFile ("debian/ghcjs-" <> ghcver <> ".links") (linkpath <> " " <> linktext <> "\n")
 
-buildTriggers :: String -> IO ()
-buildTriggers home = do
+buildTriggers :: String -> String -> IO ()
+buildTriggers home ghcver = do
   ghcjsVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-version"] mempty
   ghcjsGhcVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-ghc-version"] mempty
-  writeFile "debian/ghcjs.triggers" ("interest " <> home <> "/.ghcjs/" <> intercalate "-" [arch, os, ghcjsVersion, ghcjsGhcVersion] <> "/ghcjs/package.conf.d\n")
+  writeFile ("debian/ghcjs-" <> ghcver <> ".triggers") ("interest " <> home <> "/.ghcjs/" <> intercalate "-" [arch, os, ghcjsVersion, ghcjsGhcVersion] <> "/ghcjs/package.conf.d\n")
 
 -- | Replace a file's contents, accounting for the possibility that the
 -- old contents of the file may still be being read.
@@ -157,7 +161,7 @@ replaceFile path text =
         `E.catch` (\ e -> if isDoesNotExistError e then writeFile path text else ioError e)
 
 -- | Write a file and make it readable
-writeFileAndFixMode :: forall full item. (ListLikeIO full item, Eq full) => (FileMode -> FileMode) -> FilePath -> full -> IO ()
+writeFileAndFixMode :: forall full item. (ListLikeIO full item) => (FileMode -> FileMode) -> FilePath -> full -> IO ()
 writeFileAndFixMode fixmode path bytes = do
   fp <- IO.openFile path IO.WriteMode
   hPutStr fp bytes
