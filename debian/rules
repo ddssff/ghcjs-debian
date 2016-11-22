@@ -11,7 +11,7 @@ BRANCH := ghc-8.0
 NAME := ghcjs-$(GHCVER)
 HOMEREL := usr/lib/$(NAME)
 # This was HOME, but that meant all the cabal packages got installed
-# in /usr/lib/ghcjs-8.0.2, and were then wiped out on each run.  But I
+# in /usr/lib/ghcjs-8.0.1, and were then wiped out on each run.  But I
 # seem to recall that the ghcjs build requires HOME to be set, so we
 # will see.
 HOMEABS := $(TOP)$(HOMEREL)
@@ -41,7 +41,7 @@ debian/$(NAME)-build-stamp:
 	PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
 	PATH=$(PATH) && cd $(NAME) && cabal configure
 	PATH=$(PATH) && cd $(NAME) && cabal build
-	# Install into /usr/lib/ghcjs-8.0.2 rather than $HOME
+	# Override $HOME to install into /usr/lib/ghcjs-8.0.1
 	PATH=$(PATH) && HOME=$(HOMEABS) && cabal install ./$(NAME)
 	# Now ghcjs exists and should be in the path, we can ask its version
 	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.0 --shims-dev-branch ghc-8.0

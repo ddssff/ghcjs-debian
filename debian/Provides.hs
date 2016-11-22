@@ -1,7 +1,7 @@
 -- | Install (binary) tasks:
 --     write debian/ghcjs-8.0.substvars
 --     write debian/ghcjs-8.0.install
---     Fix the wrapper paths in usr/lib/ghcjs-8.0.2/.cabal/bin:
+--     Fix the wrapper paths in usr/lib/ghcjs-8.0.1/.cabal/bin:
 --        ghcjs, ghcjs-boot, ghcjs-run, haddock-ghcjs, hsc2hs-ghcjs
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wall #-}
@@ -33,7 +33,7 @@ import Text.Regex.TDFA
 -- I've never seen this either.  I can only guess what it does.
 default (Text)
 
--- Usage: runhaskell -idebian Provides.hs "/" "usr/lib/ghcjs-8.0.2" "8.0.2"
+-- Usage: runhaskell -idebian Provides.hs "/" "usr/lib/ghcjs-8.0.1" "8.0.1"
 --
 -- At this time, the first argument must be "/" - trying to build in a
 -- different location will result in a broken compiler.
@@ -84,7 +84,7 @@ modifyEnv var f = getEnv var >>= \old -> setEnv var (f old)
 -- | Use ghcjs-pkg to find the list of libraries built into ghcjs,
 -- turn them into debian virtual package names, and build an
 -- assignment to shell variable haskell:Provides.  That goes into the
--- ghcjs-8.0.2.substvars file.  There may already be something there by the
+-- ghcjs-8.0.1.substvars file.  There may already be something there by the
 -- time this is called, so we append.  So, not idempotent.
 compilerProvides :: MonadIO m => String -> m ()
 compilerProvides ghcver = liftIO $ compilerLibs >>= appendFile ("debian/ghcjs-" <> ghcver <> ".substvars") . providesLine
@@ -104,8 +104,8 @@ parseLib s =
       _ -> trace ("Could not parse: " ++ show s) []
 
 -- | Strip the prefix containing $PWD from the paths in the wrapper
--- scripts, leaving paths starting with /usr/lib/ghcjs-8.0.2.  Also, built
--- the ghcjs-8.0.2.links file.  This is not used because we can't actually
+-- scripts, leaving paths starting with /usr/lib/ghcjs-8.0.1.  Also, built
+-- the ghcjs-8.0.1.links file.  This is not used because we can't actually
 -- build in a location different from the eventual install, but maybe
 -- someday...
 editWrappers :: String -> String -> IO ()
