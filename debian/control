@@ -25,6 +25,7 @@ Build-Depends:
   libghc-haskeline-dev,
   libghc-http-dev,
   libghc-lens-dev,
+  libghc-listlike-dev,
   libghc-optparse-applicative-dev,
   libghc-parallel-dev,
   libghc-parsec3-dev,
