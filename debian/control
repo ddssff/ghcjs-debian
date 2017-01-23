@@ -1,4 +1,4 @@
-Source: ghcjs8
+Source: ghcjs
 Priority: optional
 Section: devel
 Maintainer: David Fox <dsf@seereason.com>
@@ -12,10 +12,10 @@ Build-Depends:
   nodejs,
   autoconf
 
-Package: ghcjs-8.0.1
+Package: ghcjs
 Architecture: any
 Section: devel
-Depends: ghc-8.0.1, nodejs (>= 0.10.24)
+Depends: ghc, nodejs (>= 0.10.24)
 Provides: ${haskell:Provides}, ghcjs-tools
 Conflicts: ghcjs-tools
 Replaces: ghcjs-tools
