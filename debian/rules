@@ -15,7 +15,6 @@ HOMEREL := usr/lib/$(NAME)
 # seem to recall that the ghcjs build requires HOME to be set, so we
 # will see.
 HOMEABS := $(TOP)$(HOMEREL)
-PATH := $(HOMEABS)/.cabal/bin:/opt/ghc/$(GHCVER)/bin:/opt/cabal/1.24/bin:/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:$(PATH)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
 
 # HOME := $(HOMEABS)
