@@ -61,7 +61,7 @@ main = do
                               "*/.ghc",
                               "*/.git"]
   readProcess "find" [homeRelative, "-type", "f"] mempty >>=
-    writeFile ("debian/ghcjs-" <> ghcver <> ".install") . unlines . map formatInstallLine . lines
+    writeFile ("debian/ghcjs.install") . unlines . map formatInstallLine . lines
 
   compilerProvides ghcver
   buildTriggers home ghcver
@@ -87,7 +87,7 @@ modifyEnv var f = getEnv var >>= \old -> setEnv var (f old)
 -- ghcjs-8.0.1.substvars file.  There may already be something there by the
 -- time this is called, so we append.  So, not idempotent.
 compilerProvides :: MonadIO m => String -> m ()
-compilerProvides ghcver = liftIO $ compilerLibs >>= appendFile ("debian/ghcjs-" <> ghcver <> ".substvars") . providesLine
+compilerProvides ghcver = liftIO $ compilerLibs >>= appendFile ("debian/ghcjs.substvars") . providesLine
 
 compilerLibs :: IO [String]
 compilerLibs = (concatMap parseLib . List.lines) <$> readProcess "ghcjs-pkg" ["list", "-v2"] ""
@@ -144,13 +144,13 @@ buildLinks home ghcver =
       doLink linkname linktext = do
         ln (bin <> "/" <> linkname) (bin <> "/" <> linktext)
         ln ("/usr/bin/" <> linkname) (bin <> "/" <> linktext)
-      ln linktext linkpath = appendFile ("debian/ghcjs-" <> ghcver <> ".links") (linkpath <> " " <> linktext <> "\n")
+      ln linktext linkpath = appendFile ("debian/ghcjs.links") (linkpath <> " " <> linktext <> "\n")
 
 buildTriggers :: String -> String -> IO ()
 buildTriggers home ghcver = do
   ghcjsVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-version"] mempty
   ghcjsGhcVersion <- (head . lines) <$> readProcess "ghcjs" ["--numeric-ghc-version"] mempty
-  writeFile ("debian/ghcjs-" <> ghcver <> ".triggers") ("interest " <> home <> "/.ghcjs/" <> intercalate "-" [arch, os, ghcjsVersion, ghcjsGhcVersion] <> "/ghcjs/package.conf.d\n")
+  writeFile ("debian/ghcjs.triggers") ("interest " <> home <> "/.ghcjs/" <> intercalate "-" [arch, os, ghcjsVersion, ghcjsGhcVersion] <> "/ghcjs/package.conf.d\n")
 
 -- | Replace a file's contents, accounting for the possibility that the
 -- old contents of the file may still be being read.
