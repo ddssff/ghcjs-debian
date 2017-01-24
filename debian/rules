@@ -28,7 +28,7 @@ build/$(NAME):: debian/$(NAME)-build-stamp
 debian/$(NAME)-build-stamp:
 	mkdir -p $(HOMEABS)
 	mkdir -p /usr/share/haddock-api  # Prevent error "Haddock's resource directory (/usr/share/haddock-api) does not exist!"
-	rsync -aHxS --delete /opt/ghc/$(GHCVER)/lib/ghc-$(GHCVER)/html/ /usr/share/haddock-api/html
+	rsync -aHxS --delete /usr/lib/ghc/html/ /usr/share/haddock-api/html
 	-apt-get remove $(NAME) --yes --force-yes
 	PATH=$(PATH) cabal update
 	-rm -r $(NAME)
