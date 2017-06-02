@@ -22,7 +22,6 @@ Build-Depends:
   libghc-ghc-paths-dev,
   libghc-haddock-api-dev,
   libghc-hashable-dev,
-  libghc-haskeline-dev,
   libghc-http-dev,
   libghc-lens-dev,
   libghc-listlike-dev,

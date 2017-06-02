@@ -24,7 +24,7 @@ debian/ghcjs-build-stamp:
 	-rm -r ghcjs
 	-- This repo has a backport of the th speedup patch
 	git clone https://github.com/seereason/ghcjs ghcjs
-	# cd ghcjs && patch -p1 < ../ghcjs.diff
+	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
 	cd ghcjs && cabal configure && cabal build
 	cabal install ./ghcjs
