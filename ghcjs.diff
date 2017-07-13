@@ -18,8 +18,9 @@ index 2dc4986..9e02d7b 100644
 @@ -152,13 +152,13 @@ Library
                     split          >= 0.2      && < 0.3,
                     deepseq,
-                    vector         >= 0.10     && < 0.12,
+-                   vector         >= 0.10     && < 0.12,
 -                   data-default   >= 0.5      && < 0.6,
++                   vector         >= 0.10     && < 0.13,
 +                   data-default   >= 0.5      && < 0.8,
                     array          >= 0.4      && < 0.6,
                     binary         >= 0.7      && < 0.8,
