@@ -10,7 +10,8 @@ Build-Depends:
   cdbs,
   git,
   nodejs,
-  autoconf
+  autoconf,
+  rsync
 
 Package: ghcjs
 Architecture: any
