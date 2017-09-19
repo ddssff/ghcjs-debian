@@ -44,7 +44,7 @@ debian/$(NAME)-build-stamp:
 	# Override $HOME to install into /usr/lib/ghcjs
 	PATH=$(PATH) && HOME=$(HOMEABS) && cabal install ./$(NAME)
 	# Now ghcjs exists and should be in the path, we can ask its version
-	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-repo https://github.com/ddssff/ghcjs-boot --ghcjs-boot-dev-branch ghc-8.0 --shims-dev-branch ghc-8.0
+	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.0 --shims-dev-branch ghc-8.0
 	touch $@
 
 install/$(NAME):: debian/$(NAME)-binary-stamp
