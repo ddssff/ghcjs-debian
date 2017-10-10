@@ -19,7 +19,7 @@ index 2dc4986..9e02d7b 100644
  newtype Ident = TxtI Text
 - deriving (Show, Data, Typeable, Hashable, Eq, Ord, Binary, Generic, NFData)
 + deriving (Show, Data, Typeable, Hashable, Eq, Ord, Generic, NFData)
-+deriving instance Binary text => Binary (TexI text)
++deriving instance Binary text => Binary (TxtI text)
  
  expr2stat :: JExpr -> JStat
  expr2stat (ApplExpr x y) = (ApplStat x y)
