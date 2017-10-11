@@ -15,6 +15,7 @@ Build-Depends:
   libghc-attoparsec-dev,
   libghc-base16-bytestring-dev,
   libghc-bin-package-db-dev,
+  libghc-binary-08-dev,
   libghc-bytestring-dev,
   libghc-cryptohash-dev,
   libghc-data-default-dev,
