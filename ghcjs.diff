@@ -9,6 +9,24 @@
                     data-default   >= 0.7      && < 0.8,
                     array          >= 0.4      && < 0.6,
                     binary         >= 0.7      && < 0.9,
+@@ -277,7 +277,7 @@
+                       text                 >= 0.11   && < 1.3,
+                       bytestring           >= 0.10   && < 0.11,
+                       system-filepath      >= 0.4    && < 0.5,
+-                      shelly               >= 1.5    && < 1.7,
++                      shelly               >= 1.5    && < 1.6.8.5,
+                       system-fileio        >= 0.3    && < 0.4,
+                       optparse-applicative >= 0.11   && < 0.13,
+                       tar                  >= 0.5    && < 0.6,
+@@ -345,7 +345,7 @@
+                       bytestring,
+                       deepseq,
+                       unordered-containers,
+-                      shelly               >= 1.5 &&  < 1.7,
++                      shelly               >= 1.5 &&  < 1.6.8.5,
+                       data-default         >= 0.7 &&  < 0.8,
+                       yaml                 >= 0.8 &&  < 0.9,
+                       optparse-applicative,
 --- a/src-bin/Boot.hs	2017-11-11 10:15:50.945621443 -0800
 +++ b/src-bin/Boot.hs	2017-11-11 10:16:21.869975253 -0800
 @@ -600,7 +600,7 @@

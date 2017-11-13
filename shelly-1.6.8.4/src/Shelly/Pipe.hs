@@ -92,6 +92,7 @@ module Shelly.Pipe
          -- * find functions 
          , find, findWhen, findFold
          , findDirFilter, findDirFilterWhen, findFoldDirFilter
+         , followSymlink
          ) where
 
 import Prelude hiding (FilePath)
@@ -118,8 +119,6 @@ import Data.ByteString (ByteString)
 import Data.Tree(Tree)
 
 import Data.Text as T hiding (concat, all, find, cons)
-
--- default (T.Text)
 
 
 -- | This type is a simple wrapper for a type @Shelly.Sh@.
@@ -264,6 +263,9 @@ tracing b = lift1 (S.tracing b)
 errExit :: Bool -> Sh a -> Sh a
 errExit b = lift1 (S.errExit b)
 
+-- | see 'S.followSymlink'
+followSymlink :: Bool -> Sh a -> Sh a
+followSymlink b = lift1 (S.followSymlink b)
 
 -- | see 'S.run'
 run :: FilePath -> [Text] -> Sh Text

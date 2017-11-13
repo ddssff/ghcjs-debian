@@ -37,7 +37,7 @@ debian/$(NAME)-build-stamp:
 	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
 	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
-	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.1 && cabal install; }; } || true
+	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
 	PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
 	PATH=$(PATH) && cd $(NAME) && cabal configure
 	PATH=$(PATH) && cd $(NAME) && cabal build

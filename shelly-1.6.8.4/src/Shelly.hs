@@ -89,6 +89,7 @@ module Shelly
 
          -- * find functions
          , find, findWhen, findFold, findDirFilter, findDirFilterWhen, findFoldDirFilter
+         , followSymlink
          ) where
 
 import Shelly.Base
@@ -828,12 +829,18 @@ verbosely a = sub $ modify (\x -> x
                                  , sPrintCommands = True
                                  }) >> a
 
--- | Create a sub-Sh in which stdout is sent to the user-defined logger
+-- | Create a sub-Sh in which stdout is sent to the user-defined
+-- logger.  When running with 'silently' the given log will not be
+-- called for any output. Likewise the log will also not be called for
+-- output from 'run_' and 'bash_' commands.
 log_stdout_with :: (Text -> IO ()) -> Sh a -> Sh a
 log_stdout_with logger a = sub $ modify (\s -> s { sPutStdout = logger })
                                  >> a
 
--- | Create a sub-Sh in which stderr is sent to the user-defined logger
+-- | Create a sub-Sh in which stderr is sent to the user-defined
+-- logger.  When running with 'silently' the given log will not be
+-- called for any output. However, unlike 'log_stdout_with' the log
+-- will be called for output from 'run_' and 'bash_' commands.
 log_stderr_with :: (Text -> IO ()) -> Sh a -> Sh a
 log_stderr_with logger a = sub $ modify (\s -> s { sPutStderr = logger })
                                  >> a
@@ -905,6 +912,15 @@ errExit shouldExit action = sub $ do
   modify $ \st -> st { sErrExit = shouldExit }
   action
 
+-- | 'find'-command follows symbolic links. Defaults to @False@.
+-- When @True@, follow symbolic links.
+-- When @False@, never follow symbolic links.
+followSymlink :: Bool -> Sh a -> Sh a
+followSymlink enableFollowSymlink action = sub $ do
+  modify $ \st -> st { sFollowSymlink = enableFollowSymlink }
+  action
+
+
 defReadOnlyState :: ReadOnlyState
 defReadOnlyState = ReadOnlyState { rosFailToDir = False }
 
@@ -948,6 +964,7 @@ shelly' ros action = do
                    , sPathExecutables = Nothing
                    , sErrExit = True
                    , sReadOnly = ros
+                   , sFollowSymlink = False
                    }
   stref <- liftIO $ newIORef def
   let caught =

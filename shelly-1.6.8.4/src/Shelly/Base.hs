@@ -39,7 +39,9 @@ import Data.Text (Text)
 import System.Process( ProcessHandle, StdStream(..) )
 import System.IO ( Handle, hFlush, stderr, stdout )
 
-import Control.Monad (when, (>=>), liftM)
+import Control.Monad (when, (>=>),
+         liftM
+       )
 import Control.Monad.Base
 import Control.Monad.Trans.Control
 import Control.Applicative (Applicative, (<$>))
@@ -125,6 +127,7 @@ data State = State
    , sTrace :: Text -- ^ the trace of command execution
    , sErrExit :: Bool -- ^ should we exit immediately on any error
    , sReadOnly :: ReadOnlyState
+   , sFollowSymlink :: Bool -- ^ 'find'-command follows symlinks.
    }
 
 data StdHandle = InHandle StdStream
