@@ -6,10 +6,8 @@
 TOP := /
 
 # This should be one of HVR's compiler versions, 8 or newer.
-GHCVER := 8.2.2
-BRANCH := ghc-8.2
-BOOTBRANCH := ghc-8.0
-SHIMSBRANCH := ghc-8.0
+GHCVER := 8.0.1
+BRANCH := ghc-8.0
 NAME := ghcjs
 HOMEREL := usr/lib/$(NAME)
 # This was HOME, but that meant all the cabal packages got installed
@@ -36,18 +34,18 @@ debian/$(NAME)-build-stamp:
 	PATH=$(PATH) cabal update
 	-rm -r $(NAME)
 	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(NAME)
-	# cd ghcjs && patch -p1 < ../ghcjs.diff
+	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
-	PATH=$(PATH) && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
-	PATH=$(PATH) && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
+	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
+	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
 	PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
 	PATH=$(PATH) && cd $(NAME) && cabal configure
 	PATH=$(PATH) && cd $(NAME) && cabal build
 	# Override $HOME to install into /usr/lib/ghcjs
 	PATH=$(PATH) && HOME=$(HOMEABS) && cabal install ./$(NAME)
 	# Now ghcjs exists and should be in the path, we can ask its version
-	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch $(BOOTBRANCH) --shims-dev-branch "-B $(SHIMSBRANCH) c275ffca803150efb90a4f97402a9c865e73929a"
-        # --shims-dev-repo "https://github.com/cyungmann/shims" --shims-dev-branch $(SHIMSBRANCH)
+	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.0 --shims-dev-branch "-B ghc-8.0 c275ffca803150efb90a4f97402a9c865e73929a"
+        # --shims-dev-repo "https://github.com/cyungmann/shims" --shims-dev-branch "ghc-8.0"
 	touch $@
 
 install/$(NAME):: debian/$(NAME)-binary-stamp
