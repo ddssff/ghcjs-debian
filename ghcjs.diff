@@ -77,7 +77,7 @@
    flags <- cabalInstallFlags (length pkgs == 1)
    let args = globalFlags ++ ("install" : pkgs) ++
 -             [ "--solver=topdown" -- the modular solver refuses to install stage1 packages
-+             [ "--solver=modular"
++             [ "--solver=modular", "--allow-boot-library-installs"
               ] ++ map ("--configure-option="<>) configureOpts ++ flags
    checkInstallPlan pkgs args
    cabal_ args
