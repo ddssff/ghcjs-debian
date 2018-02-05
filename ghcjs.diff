@@ -27,6 +27,15 @@
      exposed: True
      buildable: True
      hs-source-dirs: src lib/ghcjs-prim
+@@ -235,7 +235,7 @@
+     Hs-Source-Dirs:   src-bin
+     Build-Depends:    ghcjs,
+                       base       >= 4   && < 5,
+-                      directory  >= 1   && < 1.3,
++                      directory  >= 1   && < 1.4,
+                       process    >= 1   && < 1.6,
+                       filepath,
+                       containers,
 @@ -276,13 +276,13 @@
                        text                 >= 0.11   && < 1.3,
                        bytestring           >= 0.10   && < 0.11,
