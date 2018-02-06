@@ -33,7 +33,7 @@ debian/$(NAME)-build-stamp:
 	-apt-get remove $(NAME) --yes --force-yes
 	PATH=$(PATH) cabal update
 	-rm -r $(NAME)
-	git clone https://github.com/seereason/ghcjs -b $(BRANCH) $(NAME)
+	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(NAME)
 	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
 	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
@@ -44,8 +44,8 @@ debian/$(NAME)-build-stamp:
 	# Override $HOME to install into /usr/lib/ghcjs
 	PATH=$(PATH) && HOME=$(HOMEABS) && cabal install ./$(NAME)
 	# Now ghcjs exists and should be in the path, we can ask its version
-	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.0 --shims-dev-repo "https://github.com/seereason/shims" --shims-dev-branch "ghc-8.0"
-        # --shims-dev-branch "-B ghc-8.0 c275ffca803150efb90a4f97402a9c865e73929a"
+	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.0 --shims-dev-branch "-B ghc-8.0 c275ffca803150efb90a4f97402a9c865e73929a"
+        # --shims-dev-repo "https://github.com/cyungmann/shims" --shims-dev-branch "ghc-8.0"
 	touch $@
 
 install/$(NAME):: debian/$(NAME)-binary-stamp
