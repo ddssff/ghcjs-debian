@@ -33,7 +33,7 @@ debian/$(NAME)-build-stamp:
 	-apt-get remove $(NAME) --yes --force-yes
 	PATH=$(PATH) cabal update
 	-rm -r $(NAME)
-	git clone https://github.com/seereason/ghcjs -b $(BRANCH) $(NAME)
+	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(NAME)
 	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
 	PATH=$(PATH) && test "$(GHCVER)" = "8.0.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
