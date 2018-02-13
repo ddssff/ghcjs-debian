@@ -2,54 +2,21 @@ Source: ghcjs
 Priority: optional
 Section: devel
 Maintainer: David Fox <dsf@seereason.com>
+Build-Conflicts: ghc, happy, alex, cabal-install
 Build-Depends:
-  happy,
-  alex,
+  happy-1.19.5,
+  alex-3.1.7,
   cdbs,
-  cabal-install,
+  cabal-install-1.22,
   git,
-  ghc (>= 7.10.2),
+  ghc-7.10.3,
   nodejs,
-  autoconf,
-  libghc-aeson-dev,
-  libghc-attoparsec-dev,
-  libghc-base16-bytestring-dev,
-  libghc-bin-package-db-dev,
-  libghc-bytestring-dev,
-  libghc-cryptohash-dev,
-  libghc-data-default-dev,
-  libghc-executable-path-dev,
-  libghc-ghc-paths-dev,
-  libghc-haddock-api-dev,
-  libghc-hashable-dev,
-  libghc-http-dev,
-  libghc-lens-dev,
-  libghc-listlike-dev,
-  libghc-optparse-applicative-dev,
-  libghc-parallel-dev,
-  libghc-parsec3-dev,
-  libghc-regex-posix-dev,
-  libghc-regex-tdfa-dev,
-  libghc-safe-dev,
-  libghc-shelly-dev,
-  libghc-split-dev,
-  libghc-src-exts-dev,
-  libghc-src-meta-dev,
-  libghc-stringsearch-dev,
-  libghc-syb-dev,
-  libghc-system-fileio-dev,
-  libghc-system-filepath-dev,
-  libghc-tar-dev,
-  libghc-text-binary-dev,
-  libghc-text-dev,
-  libghc-unix-compat-dev,
-  libghc-wl-pprint-text-dev,
-  libghc-yaml-dev
+  autoconf
 
 Package: ghcjs
 Architecture: any
 Section: devel
-Depends: ghc (>= 7.10.2), nodejs (>= 0.10.24)
+Depends: ghc-7.10.3, nodejs (>= 0.10.24)
 Provides: ${haskell:Provides}, ghcjs-tools
 Conflicts: ghcjs-tools
 Replaces: ghcjs-tools

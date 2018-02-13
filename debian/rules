@@ -8,6 +8,7 @@ HOMEREL := usr/lib/ghcjs
 HOME := $(TOP)$(HOMEREL)
 PATH := $(HOME)/.cabal/bin:$(PATH)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
+CABAL := cabal-1.22
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
@@ -16,26 +17,28 @@ build/ghcjs:: debian/ghcjs-build-stamp
 
 # The result of this build is in /usr/lib/ghcjs.
 debian/ghcjs-build-stamp:
-	mkdir -p $(HOME)
+	mkdir -p $(HOME)/.cabal/logs
 	mkdir -p /usr/share/haddock-api  # Prevent "Haddock's resource directory (/usr/share/haddock-api) does not exist!" error
-	rsync -aHxS --delete /usr/lib/ghc/html/ /usr/share/haddock-api/html
+	rsync -aHxS --delete /opt/ghc/7.10.3/lib/ghc-7.10.3/html/ /usr/share/haddock-api/html
 	-apt-get remove ghcjs --force-yes
-	cabal update
+	$(CABAL) update
 	-rm -r ghcjs
-	-- This repo has a backport of the th speedup patch
 	git clone https://github.com/ghcjs/ghcjs ghcjs
 	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
-	cd ghcjs && cabal configure && cabal build
-	cabal install ./ghcjs
+	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install --dependencies-only
+	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy configure
+	cd ghcjs && $(CABAL) --with-happy=/opt/happy/1.19.5/bin/happy build
+	$(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install ./ghcjs
 	# Now ghcjs exists and should be in the path, we can ask its version
-	ghcjs-boot --dev
+	PATH=/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:/opt/ghc/7.10.3/bin:$(PATH) ghcjs-boot --with-ghc /opt/ghc/7.10.3/bin/ghc --with-ghc-pkg /opt/ghc/7.10.3/bin/ghc-pkg --with-cabal $(CABAL) --dev
 	touch $@
 
 install/ghcjs:: debian/ghcjs-binary-stamp
 
 debian/ghcjs-binary-stamp:
-	runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
+	$(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install regex-tdfa ListLike
+	/opt/ghc/7.10.3/bin/runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
 	touch $@
 
 clean::
