@@ -2,7 +2,6 @@ Source: ghcjs
 Priority: optional
 Section: devel
 Maintainer: David Fox <dsf@seereason.com>
-Build-Conflicts: ghc, happy, alex, cabal-install
 Build-Depends:
   happy-1.19.5,
   alex-3.1.7,
