@@ -26,7 +26,7 @@ debian/ghcjs-build-stamp:
 	git clone https://github.com/ghcjs/ghcjs ghcjs
 	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
-	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install --dependencies-only
+	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install --dependencies-only --constraint='base==4.8.2.0' --constraint='Cabal==1.22.5.0'
 	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy configure
 	cd ghcjs && $(CABAL) --with-happy=/opt/happy/1.19.5/bin/happy build
 	$(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install ./ghcjs
