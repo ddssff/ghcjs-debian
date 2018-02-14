@@ -9,6 +9,7 @@ HOME := $(TOP)$(HOMEREL)
 PATH := $(HOME)/.cabal/bin:$(PATH)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
 CABAL := cabal-1.22
+PATH := /opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:/opt/ghc/7.10.3/bin:$(PATH)
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
@@ -26,12 +27,12 @@ debian/ghcjs-build-stamp:
 	git clone https://github.com/ghcjs/ghcjs ghcjs
 	cd ghcjs && patch -p1 < ../ghcjs.diff
 	# cabal install ghcjs/lib/ghcjs-prim
-	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install --dependencies-only --constraint='base==4.8.2.0' --constraint='Cabal==1.22.5.0'
+	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install --dependencies-only
 	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy configure
 	cd ghcjs && $(CABAL) --with-happy=/opt/happy/1.19.5/bin/happy build
 	$(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install ./ghcjs
 	# Now ghcjs exists and should be in the path, we can ask its version
-	PATH=/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:/opt/ghc/7.10.3/bin:$(PATH) ghcjs-boot --with-ghc /opt/ghc/7.10.3/bin/ghc --with-ghc-pkg /opt/ghc/7.10.3/bin/ghc-pkg --with-cabal $(CABAL) --dev
+	ghcjs-boot --with-ghc /opt/ghc/7.10.3/bin/ghc --with-ghc-pkg /opt/ghc/7.10.3/bin/ghc-pkg --with-cabal $(CABAL) --dev
 	touch $@
 
 install/ghcjs:: debian/ghcjs-binary-stamp
