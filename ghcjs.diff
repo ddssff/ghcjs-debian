@@ -1,105 +1,56 @@
---- a/ghcjs.cabal
-+++ b/ghcjs.cabal
-@@ -141,7 +141,7 @@
-                    mtl,
-                    ghc-paths,
-                    template-haskell,
--                   syb            >= 0.6      && < 0.7,
-+                   syb            >= 0.6      && < 0.8,
-                    bytestring     >= 0.10     && < 0.11,
-                    attoparsec     >= 0.12     && < 0.14,
-                    aeson          >= 0.7      && < 0.12,
-@@ -154,7 +154,7 @@
-                    transformers,
-                    split          >= 0.2      && < 0.3,
-                    deepseq,
--                   vector         >= 0.10     && < 0.12,
-+                   vector         >= 0.10     && < 0.13,
-                    data-default   >= 0.7      && < 0.8,
-                    array          >= 0.4      && < 0.6,
-                    binary         >= 0.7      && < 0.9,
-@@ -172,7 +172,7 @@
-                    safe                       >= 0.3  && < 0.4,
-                    parsec                     >= 3.1  && < 3.2,
-                    haskell-src-exts           >= 1.16 && < 1.19,
--                   haskell-src-meta           >= 0.6.0.3  && < 0.8
-+                   haskell-src-meta           >= 0.6.0.3  && < 0.9
-     exposed: True
-     buildable: True
-     hs-source-dirs: src lib/ghcjs-prim
-@@ -276,13 +276,13 @@
-                       text                 >= 0.11   && < 1.3,
-                       bytestring           >= 0.10   && < 0.11,
-                       system-filepath      >= 0.4    && < 0.5,
--                      shelly               >= 1.5    && < 1.7,
-+                      shelly               >= 1.5    && < 1.6.8.5,
-                       system-fileio        >= 0.3    && < 0.4,
-                       optparse-applicative >= 0.11   && < 0.13,
-                       tar                  >= 0.5    && < 0.6,
-                       HTTP                 >= 4000.2 && < 5000,
-                       yaml                 >= 0.8    && < 0.9,
--                      process              >= 1.2    && < 1.5,
-+                      process              >= 1.2    && < 1.7,
-                       time                 >= 1.4    && < 1.7,
-                       unix-compat          >= 0.4    && < 0.5,
-                       executable-path      >= 0      && < 0.1
-@@ -344,7 +344,7 @@
-                       bytestring,
-                       deepseq,
-                       unordered-containers,
--                      shelly               >= 1.5 &&  < 1.7,
-+                      shelly               >= 1.5 &&  < 1.6.8.5,
-                       data-default         >= 0.7 &&  < 0.8,
-                       yaml                 >= 0.8 &&  < 0.9,
-                       optparse-applicative,
---- a/src-bin/Boot.hs	2017-11-11 10:15:50.945621443 -0800
-+++ b/src-bin/Boot.hs	2017-11-11 10:16:21.869975253 -0800
-@@ -600,7 +600,7 @@
-       branch' <- view (beSources . branch)
-       sub $ do
-         cd repoName
--        git_ ["checkout", branch']
-+        git_ ("checkout" : T.words branch')
-     cloneGitSrcs d [] = failWith ("could not clone " <> d <> ", no available sources")
-     cloneGitSrcs d (x:xs) = git_ ["clone", x] `catchAny_`
-       (msgD warn "clone failed, trying next source" >> cloneGitSrcs d xs)
-@@ -1140,8 +1140,14 @@ cabalStage1 pkgs = sub $ do
-                 ]
-   globalFlags <- cabalGlobalFlags
-   flags <- cabalInstallFlags (length pkgs == 1)
--  let args = globalFlags ++ ("install" : pkgs) ++
--             [ "--allow-boot-library-installs"
-+  let args = globalFlags ++ ("install" : pkgs) ++ [
-+-- We can't build cabal-install-2 without Cabal-2, so avoid cabal-install-2
-+-- features in that case.
-+#if MIN_VERSION_Cabal(2,0,0)
-+               "--allow-boot-library-installs"
-+#else
-+               "--solver=topdown" -- the modular solver refuses to install stage1 packages
-+#endif
-              ] ++ map ("--configure-option="<>) configureOpts ++ flags
-   checkInstallPlan pkgs args
-   cabal_ args
-@@ -1162,7 +1168,11 @@ cabalInstall pkgs = do
- -- uses somewhat fragile parsing of --dry-run output, find a better way
- checkInstallPlan :: [Package] -> [Text] -> B ()
- checkInstallPlan pkgs opts = do
-+#if MIN_VERSION_Cabal(2,0,0)
-   plan <- cabal (opts ++ ["-vverbose+nowrap", "--dry-run"])
-+#else
-+  plan <- cabal (opts ++ ["-v2", "--dry-run"])
-+#endif
-   when (hasReinstalls plan || hasUnexpectedInstalls plan || hasNewVersion plan) (err plan)
-   where
-     hasReinstalls = T.isInfixOf "(reinstall)"   -- reject reinstalls
-@@ -1504,8 +1514,10 @@ checkCabalSupport bs pgms = do
-   cbl <- run' bs (pgms ^. bpCabal) ["install", "--help"]
-   when (not $ "--ghcjs" `T.isInfixOf` cbl) $
-     failWith ("cabal-install program " <> pgms ^. bpCabal . pgmLocText <> " does not support GHCJS")
-+#if MIN_VERSION_Cabal(2,0,0)
-   when (not $ "--allow-boot-library-installs" `T.isInfixOf` cbl) $
-     failWith ("cabal-install program " <> pgms ^. bpCabal . pgmLocText <> " does not support --allow-boot-library-installs (requires version 2.0.0.0 or newer)")
-+#endif
-   void (run' bs (pgms ^. bpGhc) ["-e", "either error id (Text.Read.readEither \"GHCJS\" :: Either String Distribution.Simple.CompilerFlavor)"]) `Ex.catch`
-     \(Ex.SomeException _) -> failWith
-        ("GHC program " <> pgms ^. bpGhc . pgmLocText <> " does not have a Cabal library that supports GHCJS\n" <>
+--- old/ghcjs.cabal	2018-05-11 06:22:53.171677911 -0700
++++ new/ghcjs.cabal	2018-05-11 06:25:22.761555360 -0700
+@@ -196,7 +196,7 @@
+                     directory,
+                     filepath,
+                     ghcjs,
+-                    haddock-api-ghcjs >= 2.15
++                    haddock-api >= 2.15
+     GHC-Options:    -Wall
+ 
+ Executable hsc2hs-ghcjs
+--- old/utils/pkg-input/haddock-api-ghcjs/src/Haddock.hs
++++ new/utils/pkg-input/haddock-api-ghcjs/src/Haddock.hs
+@@ -62,7 +62,7 @@ import System.FilePath
+ #else
+ import qualified GHC.Paths as GhcPaths
+ import Paths_haddock_api_ghcjs (getDataDir)
+-import System.Directory (doesDirectoryExist)
++import System.Directory (doesDirectoryExist, getCurrentDirectory)
+ #endif
+ 
+ import GHC hiding (verbosity)
+@@ -438,10 +438,11 @@ getHaddockLibDir flags =
+             exists <- doesDirectoryExist p
+             pure $ if exists then Just p else Nothing
+ 
+-      dirs <- mapM check res_dirs  
++      dirs <- mapM check res_dirs
++      here <- getCurrentDirectory
+       case [p | Just p <- dirs] of
+         (p : _) -> return p 
+-        _       -> die "Haddock's resource directory does not exist!\n"
++        _       -> die $ "Haddock's resource directory does not exist!\n  " ++ show dirs ++ ", PWD=" ++ show here ++ "\n"
+ #endif
+     fs -> return (last fs)
+ 
+--- old/utils/makePackages.sh	2018-05-17 15:25:41.624736849 -0700
++++ new/utils/makePackages.sh	2018-05-17 15:28:25.679242564 -0700
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+ 
++set -x
++
+ # pull the code for GHCJS dependencies from the GHC tree in
+ #   lib/ghc
+ #
+@@ -222,7 +222,7 @@
+ cd "$GHCSRC"
+ if [ ! -f ./configure ]; then
+     echo "booting GHC tree"
+-    ./boot
++    ../utils/boot
+ fi
+ 
+ if [ ! -f ./compiler/ghc.cabal ]; then

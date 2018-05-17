@@ -17,8 +17,9 @@ HOMEREL := usr/lib/$(NAME)
 HOMEABS := $(TOP)$(HOMEREL)
 PATH := $(HOMEABS)/.cabal/bin:$(PATH)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
+BUILD := dist-newstyle/build/x86_64-linux/ghc-8.2.2/ghcjs-8.2.0.1/build
 
-# HOME := $(HOMEABS)
+HOME := $(HOMEABS)
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
@@ -28,24 +29,48 @@ build/$(NAME):: debian/$(NAME)-build-stamp
 # The result of this build is in /usr/lib/ghcjs.
 debian/$(NAME)-build-stamp:
 	mkdir -p $(HOMEABS)
-	mkdir -p /usr/share/haddock-api  # Prevent error "Haddock's resource directory (/usr/share/haddock-api) does not exist!"
-	rsync -aHxS --delete /usr/lib/ghc/html/ /usr/share/haddock-api/html
-	-apt-get remove $(NAME) --yes --force-yes
-	PATH=$(PATH) cabal update
-	-rm -r $(NAME)
-	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(NAME)
+	rm -rf ghcjs
+	git clone https://github.com/ghcjs/ghcjs -b ghc-8.2 ghcjs
+	git submodule update --init --recursive
 	cd ghcjs && patch -p1 < ../ghcjs.diff
-	# cabal install ghcjs/lib/ghcjs-prim
-	PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
-	PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
-	PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
-	PATH=$(PATH) && cd $(NAME) && cabal configure
-	PATH=$(PATH) && cd $(NAME) && cabal build
-	# Override $HOME to install into /usr/lib/ghcjs
-	PATH=$(PATH) && HOME=$(HOMEABS) && cabal install ./$(NAME)
-	# Now ghcjs exists and should be in the path, we can ask its version
-	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.2 --shims-dev-repo "https://github.com/seereason/shims" --shims-dev-branch "ghc-8.2"
-        # --shims-dev-branch "-B ghc-8.2 c275ffca803150efb90a4f97402a9c865e73929a"
+	cd ghcjs && utils/makePackages.sh copy
+	cd ghcjs && cabal new-configure
+	cd ghcjs && cabal new-install
+	# installs into $HOME/.ghcjs/x86_64-linux-8.2.0.1-8.2.2,
+	# $HOME/.cabal/bin
+	cd ghcjs && cabal new-build
+	# Make executables available:
+	cd ghcjs && mkdir -p bin
+	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/ghcjs
+	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/ghcjs-pkg
+	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/haddock-ghcjs
+	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/hsc2hs-ghcjs
+	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/ghcjs-boot
+	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/ghcjs-run
+	cd ghcjs && rsync -aHxS --delete ghc/utils/haddock/haddock-api/ $HOME/.ghcjs/x86_64-linux-8.2.0.1-8.2.2/ghcjs/haddock-api
+	cd ghcjs && PATH=$PWD/bin:$PATH haddock_api_ghcjs_datadir=../../../../ghcjs/haddock-api/resources ghcjs-boot -s data/boot.tar
+
+#	mkdir -p /usr/share/haddock-api  # Prevent error "Haddock's resource directory (/usr/share/haddock-api) does not exist!"
+#	rsync -aHxS --delete /usr/lib/ghc/html/ /usr/share/haddock-api/html
+#	-apt-get remove $(NAME) --yes --force-yes
+#	PATH=$(PATH) cabal update
+#	-rm -r $(NAME)
+#	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(NAME)
+#	cd ghcjs && patch -p1 < ../ghcjs.diff
+#	# cabal install ghcjs/lib/ghcjs-prim
+#	# PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
+#	# PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
+#	PATH=$(PATH) && cd $(NAME) && cabal install --disable-tests utils/pkg-input/template-haskell-ghcjs
+#	PATH=$(PATH) && cd $(NAME) && cabal install --disable-tests utils/pkg-input/ghci-ghcjs
+#	PATH=$(PATH) && cd $(NAME) && cabal install --disable-tests utils/pkg-input/ghc-api-ghcjs
+#	PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
+#	PATH=$(PATH) && cd $(NAME) && cabal configure
+#	PATH=$(PATH) && cd $(NAME) && cabal build
+#	# Override $HOME to install into /usr/lib/ghcjs
+#	PATH=$(PATH) && HOME=$(HOMEABS) && cabal install ./$(NAME)
+#	# Now ghcjs exists and should be in the path, we can ask its version
+#	PATH=$(PATH) && ghcjs-boot --dev --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.2 --shims-dev-repo "https://github.com/seereason/shims" --shims-dev-branch "ghc-8.2"
+#        # --shims-dev-branch "-B ghc-8.2 c275ffca803150efb90a4f97402a9c865e73929a"
 	touch $@
 
 install/$(NAME):: debian/$(NAME)-binary-stamp
@@ -56,4 +81,4 @@ debian/$(NAME)-binary-stamp:
 	touch $@
 
 clean::
-	rm -rf $(TOP)$(HOMEREL) usr ghcjs-[78]* debian/$(NAME)-build-stamp debian/$(NAME)-binary-stamp debian/$(NAME).install debian/$(NAME).links debian/$(NAME).substvars debian/$(NAME).triggers haddock-api-2.17.3/dist shelly-1.6.8.1/dist
+	rm -rf ghcjs $(HOMEABS) usr ghcjs-[78]* debian/$(NAME)-build-stamp debian/$(NAME)-binary-stamp debian/$(NAME).install debian/$(NAME).links debian/$(NAME).substvars debian/$(NAME).triggers haddock-api-2.17.3/dist shelly-1.6.8.1/dist
