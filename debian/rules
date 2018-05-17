@@ -31,7 +31,7 @@ debian/$(NAME)-build-stamp:
 	mkdir -p $(HOMEABS)
 	rm -rf ghcjs
 	git clone https://github.com/ghcjs/ghcjs -b ghc-8.2 ghcjs
-	git submodule update --init --recursive
+	cd ghcjs && git submodule update --init --recursive
 	cd ghcjs && patch -p1 < ../ghcjs.diff
 	cd ghcjs && utils/makePackages.sh copy
 	cd ghcjs && cabal new-configure
