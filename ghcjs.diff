@@ -45,6 +45,15 @@
  # pull the code for GHCJS dependencies from the GHC tree in
  #   lib/ghc
  #
+@@ -159,7 +161,7 @@
+     SRCDIST="$SRCDISTTMP"
+   done
+   (
+-  cd "$PKGDST"
++  rm -rf "$PKGDST"; mkdir -p "$PKGDST"; cd "$PKGDST"
+   echo "unpacking sources: $SRCDIST"
+   tar --strip 1 -xzf "$SRCDIST"
+   )
 @@ -222,7 +222,7 @@
  cd "$GHCSRC"
  if [ ! -f ./configure ]; then

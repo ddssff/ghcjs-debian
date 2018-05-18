@@ -29,11 +29,12 @@ build/$(NAME):: debian/$(NAME)-build-stamp
 # The result of this build is in /usr/lib/ghcjs.
 debian/$(NAME)-build-stamp:
 	mkdir -p $(HOMEABS)
-	rm -rf ghcjs
-	git clone https://github.com/ghcjs/ghcjs -b ghc-8.2 ghcjs
+	test -d ghcjs/.git || { rm -rf ghcjs && git clone https://github.com/ghcjs/ghcjs -b ghc-8.2 ghcjs; }
+	cd ghcjs && git reset --hard && git pull
 	cd ghcjs && git submodule update --init --recursive
 	cd ghcjs && patch -p1 < ../ghcjs.diff
-	cd ghcjs && utils/makePackages.sh copy
+	# link or copy?  IDK.
+	cd ghcjs && utils/makePackages.sh link
 	cd ghcjs && cabal new-configure
 	cd ghcjs && cabal new-install
 	# installs into $HOME/.ghcjs/x86_64-linux-8.2.0.1-8.2.2,
@@ -48,7 +49,7 @@ debian/$(NAME)-build-stamp:
 	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/ghcjs-boot
 	cd ghcjs && ln -s ../utils/dist-newstyle-wrapper.sh bin/ghcjs-run
 	cd ghcjs && rsync -aHxS --delete ghc/utils/haddock/haddock-api/ $HOME/.ghcjs/x86_64-linux-8.2.0.1-8.2.2/ghcjs/haddock-api
-	cd ghcjs && PATH=$PWD/bin:$PATH haddock_api_ghcjs_datadir=../../../../ghcjs/haddock-api/resources ghcjs-boot -s data/boot.tar
+	cd ghcjs && PATH=$PWD/bin:$PATH haddock_api_ghcjs_datadir=../../../../ghcjs/haddock-api/resources ghcjs-boot -s data/boot.tar --with-node /usr/bin/nodejs --ghcjs-boot-dev-branch ghc-8.2 --shims-dev-repo "https://github.com/seereason/shims" --shims-dev-branch "ghc-8.2"
 
 #	mkdir -p /usr/share/haddock-api  # Prevent error "Haddock's resource directory (/usr/share/haddock-api) does not exist!"
 #	rsync -aHxS --delete /usr/lib/ghc/html/ /usr/share/haddock-api/html
