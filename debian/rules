@@ -13,7 +13,6 @@ HOMEREL := usr/lib/$(NAME)
 # seem to recall that the ghcjs build requires HOME to be set, so we
 # will see.
 HOMEABS := $(TOP)$(HOMEREL)
-PATH := $(HOMEABS)/.cabal/bin:$(PATH)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
 
 # Avoid capturing the home directory in all the Paths_*.hs files.
@@ -26,7 +25,7 @@ build/$(NAME):: debian/$(NAME)-build-stamp
 
 # The result of this build is in /usr/lib/ghcjs.
 debian/$(NAME)-build-stamp:
-	PATH=$(PATH) && HOME=$(HOMEABS) && cabal update
+	HOME=$(HOMEABS) && cabal update
 	# Uninstall any existing ghcjs deb
 	-apt-get remove $(NAME) --yes --force-yes
 	# Get rid of any existing clone of ghcjs
@@ -36,11 +35,11 @@ debian/$(NAME)-build-stamp:
 	# Apply our local patches
 	cat ghcjs.diff | { cd $(HOMEABS) && patch -p1; }
 	# cabal install ghcjs/lib/ghcjs-prim
-	# PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
-	# PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
+	# test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
+	# test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
 	# Install customized ghcjs dependency packages
 	cd $(HOMEABS) && HOME=$(HOMEABS) && utils/makePackages.sh link
-	# PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
+	# cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-configure
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-build
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-install --symlink-bindir=/usr/bin
@@ -56,9 +55,9 @@ install/$(NAME):: debian/$(NAME)-binary-stamp
 
 debian/$(NAME)-binary-stamp:
 	# Libraries that Provides.hs script needs to run
-	PATH=$(PATH) && cabal install regex-tdfa
+	cabal install regex-tdfa
 	# Build debian/ghcjs.install and debian/ghcjs.substvars
-	PATH=$(PATH) && runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
+	runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
 	touch $@
 
 clean::
