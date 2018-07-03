@@ -1,46 +1,65 @@
 #!/usr/bin/make -f
 
-# It would be nice to build ghcjs inside our current directory,
-# but the path gets recorded in the result.  Try it.
+# It would be nice to build ghcjs inside our current directory, but
+# the path gets recorded in the result.  So TOP needs to be "/".
 # TOP := $(PWD)
 TOP := /
-HOMEREL := usr/lib/ghcjs
-HOME := $(TOP)$(HOMEREL)
-PATH := $(HOME)/.cabal/bin:$(PATH)
+
+BRANCH := ghc-8.4
+NAME := ghcjs
+HOMEREL := usr/lib/$(NAME)
+# This was HOME, but that meant all the cabal packages got installed
+# in /usr/lib/ghcjs, and were then wiped out on each run.  But I
+# seem to recall that the ghcjs build requires HOME to be set, so we
+# will see.
+HOMEABS := $(TOP)$(HOMEREL)
+PATH := $(HOMEABS)/.cabal/bin:$(PATH)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
-CABAL := cabal-1.22
-PATH := /opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:/opt/ghc/7.10.3/bin:$(PATH)
+
+# Avoid capturing the home directory in all the Paths_*.hs files.
+HOME := $(HOMEABS)
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
 
-build/ghcjs:: debian/ghcjs-build-stamp
+build/$(NAME):: debian/$(NAME)-build-stamp
 
 # The result of this build is in /usr/lib/ghcjs.
-debian/ghcjs-build-stamp:
-	mkdir -p $(HOME)/.cabal/logs
-	mkdir -p /usr/share/haddock-api  # Prevent "Haddock's resource directory (/usr/share/haddock-api) does not exist!" error
-	rsync -aHxS --delete /opt/ghc/7.10.3/lib/ghc-7.10.3/html/ /usr/share/haddock-api/html
-	-apt-get remove ghcjs --force-yes
-	$(CABAL) update
-	-rm -r ghcjs
-	git clone https://github.com/ghcjs/ghcjs ghcjs
-	cd ghcjs && patch -p1 < ../ghcjs.diff
+debian/$(NAME)-build-stamp:
+	PATH=$(PATH) && HOME=$(HOMEABS) && cabal update
+	# Uninstall any existing ghcjs deb
+	-apt-get remove $(NAME) --yes --force-yes
+	# Get rid of any existing clone of ghcjs
+	-rm -rf $(HOMEABS)
+	# Clone the ghcjs repository
+	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(HOMEABS)
+	# Apply our local patches
+	cat ghcjs.diff | { cd $(HOMEABS) && patch -p1; }
 	# cabal install ghcjs/lib/ghcjs-prim
-	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install --dependencies-only
-	cd ghcjs && $(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy configure
-	cd ghcjs && $(CABAL) --with-happy=/opt/happy/1.19.5/bin/happy build
-	$(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install ./ghcjs
+	# PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
+	# PATH=$(PATH) && test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
+	# Install customized ghcjs dependency packages
+	cd $(HOMEABS) && HOME=$(HOMEABS) && utils/makePackages.sh link
+	# PATH=$(PATH) && cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
+	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-configure
+	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-build
+	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-install --symlink-bindir=/usr/bin
+	# Set up some haddock support
+	# mkdir -p /usr/lib/ghcjs/.cabal/share/x86_64-linux-ghc-8.4.3/haddock-api-ghcjs-2.20.0
+	D=`echo ./dist-newstyle/build/*/*/haddock-api-ghcjs-* | sed -n 's:^.*/\(.*\)/\(.*\)/\(.*\):/usr/lib/ghcjs/.cabal/share/\1-\2/\3:p'` && mkdir -p $D && rsync -aHxS --delete /usr/lib/ghc/html/ $D/html
 	# Now ghcjs exists and should be in the path, we can ask its version
-	ghcjs-boot --with-ghc /opt/ghc/7.10.3/bin/ghc --with-ghc-pkg /opt/ghc/7.10.3/bin/ghc-pkg --with-cabal $(CABAL) --dev
+	ghcjs-boot --with-node /usr/bin/nodejs -s lib/boot
+        # --shims-dev-branch "-B ghc-8.2 c275ffca803150efb90a4f97402a9c865e73929a"
 	touch $@
 
-install/ghcjs:: debian/ghcjs-binary-stamp
+install/$(NAME):: debian/$(NAME)-binary-stamp
 
-debian/ghcjs-binary-stamp:
-	$(CABAL) --extra-prog-path=/opt/ghc/bin --extra-prog-path=/opt/ghc/7.10.3/bin --with-happy=/opt/happy/1.19.5/bin/happy install regex-tdfa ListLike
-	/opt/ghc/7.10.3/bin/runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
+debian/$(NAME)-binary-stamp:
+	# Libraries that Provides.hs script needs to run
+	PATH=$(PATH) && cabal install regex-tdfa
+	# Build debian/ghcjs.install and debian/ghcjs.substvars
+	PATH=$(PATH) && runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
 	touch $@
 
 clean::
-	rm -rf $(TOP)$(HOMEREL) usr ghcjs debian/ghcjs-build-stamp debian/ghcjs-binary-stamp debian/ghcjs.install debian/ghcjs.links debian/ghcjs.substvars debian/ghcjs.triggers
+	rm -rf $(TOP)$(HOMEREL) usr ghcjs-[78]* debian/$(NAME)-build-stamp debian/$(NAME)-binary-stamp debian/$(NAME).install debian/$(NAME).links debian/$(NAME).substvars debian/$(NAME).triggers haddock-api-2.17.3/dist shelly-1.6.8.1/dist

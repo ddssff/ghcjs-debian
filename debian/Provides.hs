@@ -11,8 +11,8 @@ import Control.Monad (when)
 import Control.Monad.Trans (liftIO, MonadIO)
 import Data.Char (toLower)
 import Data.List as List (intercalate, isPrefixOf, lines)
-import Data.ListLike as LL ()
-import Data.ListLike.IO as LL (hPutStr, ListLikeIO, writeFile)
+-- import Data.ListLike as LL ()
+-- import Data.ListLike.IO as LL (hPutStr, ListLikeIO, writeFile)
 import Data.Monoid ((<>))
 import Data.Text as Text (Text)
 import Debug.Trace (trace)
@@ -23,14 +23,13 @@ import System.FilePath (takeDirectory)
 import System.Process (readProcess)
 import System.Environment (getEnv)
 import System.Info (arch, os)
-import System.IO as IO (Handle, IOMode(WriteMode), openFile)
+import System.IO as IO (Handle, hPutStr, IOMode(WriteMode), openFile, writeFile)
 import System.IO.Error (isDoesNotExistError)
 import System.Posix.Files (getSymbolicLinkStatus, getFdStatus, fileMode, readSymbolicLink, setFdMode)
 import System.Posix.IO (handleToFd, closeFd)
 import System.Posix.Types (FileMode)
 import Text.Regex.TDFA
 
--- I've never seen this either.  I can only guess what it does.
 default (Text)
 
 main :: IO ()
@@ -150,14 +149,14 @@ buildTriggers home = do
 
 -- | Replace a file's contents, accounting for the possibility that the
 -- old contents of the file may still be being read.
-replaceFile :: forall full item. (ListLikeIO full item, Eq full) => FilePath -> full -> IO ()
+replaceFile :: FilePath -> String -> IO ()
 replaceFile path text =
     (getSymbolicLinkStatus path >>= return . fileMode >>= \mode ->
      removeFile path >> writeFileAndFixMode (const mode) path text)
         `E.catch` (\ e -> if isDoesNotExistError e then writeFile path text else ioError e)
 
 -- | Write a file and make it readable
-writeFileAndFixMode :: forall full item. (ListLikeIO full item, Eq full) => (FileMode -> FileMode) -> FilePath -> full -> IO ()
+writeFileAndFixMode :: (FileMode -> FileMode) -> FilePath -> String -> IO ()
 writeFileAndFixMode fixmode path bytes = do
   fp <- IO.openFile path IO.WriteMode
   hPutStr fp bytes

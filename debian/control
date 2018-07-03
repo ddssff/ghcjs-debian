@@ -3,19 +3,20 @@ Priority: optional
 Section: devel
 Maintainer: David Fox <dsf@seereason.com>
 Build-Depends:
-  happy-1.19.5,
-  alex-3.1.7,
+  alex,
+  autoconf,
+  happy,
+  cabal-install (>= 2.2),
   cdbs,
-  cabal-install-1.22,
+  ghc (>= 8.4),
   git,
-  ghc-7.10.3,
   nodejs,
-  autoconf
+  npm
 
 Package: ghcjs
 Architecture: any
 Section: devel
-Depends: ghc-7.10.3, nodejs (>= 0.10.24)
+Depends: ghc, nodejs (>= 0.10.24)
 Provides: ${haskell:Provides}, ghcjs-tools
 Conflicts: ghcjs-tools
 Replaces: ghcjs-tools
