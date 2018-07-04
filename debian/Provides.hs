@@ -22,6 +22,7 @@ import System.Environment (getArgs, setEnv)
 import System.FilePath (takeDirectory)
 import System.Process (readProcess)
 import System.Environment (getEnv)
+import System.FilePath ((</>))
 import System.Info (arch, os)
 import System.IO as IO (Handle, hPutStr, IOMode(WriteMode), openFile, writeFile)
 import System.IO.Error (isDoesNotExistError)
@@ -60,7 +61,7 @@ main = do
 
   compilerProvides
   buildTriggers home
-  -- buildLinks home
+  buildLinks
 
   -- when (home /= build) (editWrappers build home)
 
@@ -129,17 +130,13 @@ editWrappers build homeRelative =
       fixPaths s | isPrefixOf build s = home <> fixPaths (drop (length build) s)
       fixPaths (c:s) = c : fixPaths s
 
-buildLinks :: String -> IO ()
-buildLinks home =
-    getDirectoryContents bin >>= mapM_ doFile
+buildLinks :: IO ()
+buildLinks =
+    mapM_ doLink ["ghcjs","ghcjs-pkg", "ghcjs-run", "haddock-ghcjs", "hsc2hs-ghcjs", "ghcjs-boot"]
     where
-      bin = home <> "/.cabal/bin"
-      doFile linkname =
-          (try . readSymbolicLink) (bin <> "/" <> linkname) >>=
-          either (\(_ :: IOError) -> return ()) (doLink linkname)
-      doLink linkname linktext = do
-        ln (bin <> "/" <> linkname) (bin <> "/" <> linktext)
-        ln ("/usr/bin/" <> linkname) (bin <> "/" <> linktext)
+      doLink linkname = do
+        ln "/usr/lib/ghcjs/utils/dist-newstyle-wrapper.sh" ("/usr/bin" </> linkname)
+      -- linkpath = "source", linktext = "destination"
       ln linktext linkpath = appendFile "debian/ghcjs.links" (linkpath <> " " <> linktext <> "\n")
 
 buildTriggers :: String -> IO ()
