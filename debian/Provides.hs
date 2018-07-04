@@ -40,7 +40,7 @@ main = do
 
   setEnv "HOME" build
 
-  when (home /= build) (editWrappers home build)
+  -- when (home /= build) (editWrappers home build)
 
   _ <- readProcess "mkdir" ["-p", "usr/lib"] mempty
   _ <- readProcess "rsync" ["-aHxS", "--delete", (home <> "/"), "usr/lib/ghcjs"] mempty
@@ -60,9 +60,9 @@ main = do
 
   compilerProvides
   buildTriggers home
-  buildLinks home
+  -- buildLinks home
 
-  when (home /= build) (editWrappers build home)
+  -- when (home /= build) (editWrappers build home)
 
 formatInstallLine :: String -> String
 formatInstallLine s = "/" <> s <> " " <> ("/" <> takeDirectory s)
