@@ -16,7 +16,8 @@ HOMEABS := $(TOP)$(HOMEREL)
 DEB_DH_SHLIBDEPS_ARGS += -X$(HOMEREL)/.ghcjs -XlibHS
 
 # Avoid capturing the home directory in all the Paths_*.hs files.
-HOME := $(HOMEABS)
+# (Does this export make all the HOME= below unnecessary?)
+export HOME := $(HOMEABS)
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 # include /usr/share/cdbs/1/class/hlibrary.mk
@@ -50,9 +51,9 @@ install/$(NAME):: debian/$(NAME)-binary-stamp
 
 debian/$(NAME)-binary-stamp:
 	# Libraries that Provides.hs script needs to run
-	cabal install regex-tdfa
+	HOME=$(HOMEABS) && cabal install regex-tdfa
 	# Build debian/ghcjs.install and debian/ghcjs.substvars
-	runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
+	HOME=$(HOMEABS) && runhaskell -idebian debian/Provides.hs $(TOP) $(HOMEREL)
 	touch $@
 
 clean::
