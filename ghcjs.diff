@@ -24,7 +24,7 @@
  
  getHaddockLibDir :: [Flag] -> IO String
  getHaddockLibDir flags =
-+  here <- getCurrentDirectory
++  getCurrentDirectory >>= \here ->
    case [str | Flag_Lib str <- flags] of
      [] -> do
  #ifdef IN_GHC_TREE
