@@ -25,7 +25,6 @@ build/$(NAME):: debian/$(NAME)-build-stamp
 
 # The result of this build is in /usr/lib/ghcjs.
 debian/$(NAME)-build-stamp:
-	HOME=$(HOMEABS) && cabal update
 	# Uninstall any existing ghcjs deb
 	-apt-get remove $(NAME) --yes --force-yes
 	# Get rid of any existing clone of ghcjs
@@ -40,6 +39,7 @@ debian/$(NAME)-build-stamp:
 	# Install customized ghcjs dependency packages
 	cd $(HOMEABS) && HOME=$(HOMEABS) && utils/makePackages.sh link
 	# cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
+	HOME=$(HOMEABS) && cabal update
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-configure
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-build
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-install --symlink-bindir=/usr/bin
