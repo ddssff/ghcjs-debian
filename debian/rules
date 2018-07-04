@@ -42,7 +42,7 @@ debian/$(NAME)-build-stamp:
 	# cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-install --symlink-bindir=/usr/bin
 	cd $(HOMEABS) && for i in ghcjs ghcjs-pkg ghcjs-run haddock-ghcjs hsc2hs-ghcjs ghcjs-boot; do ln -s ../lib/ghcjs/utils/dist-newstyle-wrapper.sh /usr/bin/$$i; done
 	# Set up some haddock support
-	D=`echo ./dist-newstyle/build/*/*/haddock-api-ghcjs-* | sed -n 's:^.*/\(.*\)/\(.*\)/\(.*\):/usr/lib/ghcjs/.cabal/share/\1-\2/\3:p'` && mkdir -p $$D && rsync -aHxS --delete /usr/lib/ghc/html/ $$D/html
+	cd $(HOMEABS) && D=`echo ./dist-newstyle/build/*/*/haddock-api-ghcjs-* | sed -n 's:^.*/\(.*\)/\(.*\)/\(.*\):/usr/lib/ghcjs/.cabal/share/\1-\2/\3:p'` && mkdir -p $$D && rsync -aHxS --delete /usr/lib/ghc/html/ $$D/html
 	cd $(HOMEABS) && ghcjs-boot --with-node /usr/bin/nodejs -s lib/boot
 	touch $@
 
