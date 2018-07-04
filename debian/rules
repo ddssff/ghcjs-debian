@@ -34,22 +34,16 @@ debian/$(NAME)-build-stamp:
 	# Apply our local patches
 	cat ghcjs.diff | { cd $(HOMEABS) && patch -p1; }
 	# cabal install ghcjs/lib/ghcjs-prim
-	# test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest haddock-api || { cd haddock-api-2.17.3 && cabal install; }; } || true
-	# test "$(GHCVER)" = "8.2.2" && { ghc-pkg latest shelly || { cd shelly-1.6.8.4 && cabal install; }; } || true
-	# Install customized ghcjs dependency packages
 	cd $(HOMEABS) && HOME=$(HOMEABS) && utils/makePackages.sh link
 	# cd $(NAME) && cabal install --avoid-reinstalls --global --only-dependencies
 	HOME=$(HOMEABS) && cabal update
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-configure
 	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-build
-	cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-install --symlink-bindir=/usr/bin
-	cd $(HOMEABS) && for i in ghcjs ghcjs-pkg haddock-ghcjs hsc2hs-ghcjs ghcjs-boot; do ln -s ../lib/ghcjs/utils/dist-newstyle-wrapper.sh /usr/bin/$i; done
+	# cd $(HOMEABS) && HOME=$(HOMEABS) && cabal new-install --symlink-bindir=/usr/bin
+	cd $(HOMEABS) && for i in ghcjs ghcjs-pkg ghcjs-run haddock-ghcjs hsc2hs-ghcjs ghcjs-boot; do ln -s ../lib/ghcjs/utils/dist-newstyle-wrapper.sh /usr/bin/$$i; done
 	# Set up some haddock support
-	# mkdir -p /usr/lib/ghcjs/.cabal/share/x86_64-linux-ghc-8.4.3/haddock-api-ghcjs-2.20.0
-	D=`echo ./dist-newstyle/build/*/*/haddock-api-ghcjs-* | sed -n 's:^.*/\(.*\)/\(.*\)/\(.*\):/usr/lib/ghcjs/.cabal/share/\1-\2/\3:p'` && mkdir -p $D && rsync -aHxS --delete /usr/lib/ghc/html/ $D/html
-	# Now ghcjs exists and should be in the path, we can ask its version
-	ghcjs-boot --with-node /usr/bin/nodejs -s lib/boot
-        # --shims-dev-branch "-B ghc-8.2 c275ffca803150efb90a4f97402a9c865e73929a"
+	D=`echo ./dist-newstyle/build/*/*/haddock-api-ghcjs-* | sed -n 's:^.*/\(.*\)/\(.*\)/\(.*\):/usr/lib/ghcjs/.cabal/share/\1-\2/\3:p'` && mkdir -p $$D && rsync -aHxS --delete /usr/lib/ghc/html/ $$D/html
+	cd $(HOMEABS) && ghcjs-boot --with-node /usr/bin/nodejs -s lib/boot
 	touch $@
 
 install/$(NAME):: debian/$(NAME)-binary-stamp
