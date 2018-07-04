@@ -94,6 +94,7 @@ parseLib :: String -> [String]
 parseLib s =
     case s =~ ("^.*\\((.*)-([0-9.]*)-(.....)..........*\\)$" :: String) :: (String, String, String, [String]) of
       (_, _, _, [name,ver,chk]) ->
+        trace ("parsed " ++ show s ++ " -> " ++ show [name,ver,chk])
           ["libghcjs-" <> map toLower name <> "-dev",
            "libghcjs-" <> map toLower name <> "-dev-" <> ver <> "-" <> chk]
       _ -> trace ("Could not parse: " ++ show s) []
