@@ -11,7 +11,8 @@ Build-Depends:
   ghc (>= 8.4),
   git,
   nodejs,
-  npm
+  npm,
+  rsync
 
 Package: ghcjs
 Architecture: any
