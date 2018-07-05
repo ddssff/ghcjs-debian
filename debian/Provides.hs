@@ -135,7 +135,7 @@ buildLinks =
     mapM_ doLink ["ghcjs","ghcjs-pkg", "ghcjs-run", "haddock-ghcjs", "hsc2hs-ghcjs", "ghcjs-boot"]
     where
       doLink linkname = do
-        ln "/usr/lib/ghcjs/utils/dist-newstyle-wrapper.sh" ("/usr/bin" </> linkname)
+        ln ("/usr/bin" </> linkname) "/usr/lib/ghcjs/utils/dist-newstyle-wrapper.sh"
       -- linkpath = "source", linktext = "destination"
       ln linktext linkpath = appendFile "debian/ghcjs.links" (linkpath <> " " <> linktext <> "\n")
 
