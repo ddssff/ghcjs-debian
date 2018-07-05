@@ -9,6 +9,17 @@
  fi
  
  if [ ! -f ./compiler/ghc.cabal ]; then
+--- old/utils/dist-newstyle-wrapper.sh	2018-07-05 06:17:08.628458099 -0700
++++ new/utils/dist-newstyle-wrapper.sh	2018-07-05 06:16:56.084632502 -0700
+@@ -48,7 +48,7 @@
+ GHCJSVER="${GHCJS:6}" # drop the 'ghcjs-' prefix
+ GHCLIBVER=`ghcjs/ghcjs -B/ --numeric-ghc-version`
+ DISTDIR="$PWD"
+-LIBDIR="$HOME/.ghcjs/${ARCH}-${GHCJSVER}-${GHCLIBVER}/ghcjs"
++LIBDIR="/usr/lib/ghcjs/.ghcjs/${ARCH}-${GHCJSVER}-${GHCLIBVER}/ghcjs"
+ popd > /dev/null
+ popd > /dev/null
+ popd > /dev/null
 --- old/utils/pkg-input/haddock-api-ghcjs/src/Haddock.hs~	2018-07-03 18:25:51.476820305 +0000
 +++ new/utils/pkg-input/haddock-api-ghcjs/src/Haddock.hs	2018-07-03 18:25:19.837255552 +0000
 @@ -49,6 +49,8 @@
