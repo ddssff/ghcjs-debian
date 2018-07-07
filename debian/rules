@@ -47,6 +47,7 @@ debian/$(NAME)-build-stamp:
 	# Set up some haddock support
 	cd $(HOMEABS) && D=`echo ./dist-newstyle/build/*/*/haddock-api-ghcjs-* | sed -n 's:^.*/\(.*\)/\(.*\)/\(.*\):/usr/lib/ghcjs/.cabal/share/\1-\2/\3:p'` && mkdir -p $$D && rsync -aHxS --delete /usr/lib/ghc/html/ $$D/html
 	cd $(HOMEABS) && ghcjs-boot --with-node /usr/bin/nodejs -s lib/boot
+	cd $(HOMEABS) && rm -rf ghc
 	touch $@
 
 install/$(NAME):: debian/$(NAME)-binary-stamp
