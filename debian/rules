@@ -36,7 +36,7 @@ debian/$(NAME)-build-stamp:
 	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(HOMEABS)
 	# Apply our local patches
 	cat ghcjs.diff | { cd $(HOMEABS) && patch -p1; }
-	cat ghcjs-bug-666.diff | { cd $(HOMEABS) && patch -p1; }
+	#cat ghcjs-bug-666.diff | { cd $(HOMEABS) && patch -p1; }
 	cat DataDynamic.diff | { cd $(HOMEABS) && patch -p1; }
 	# cabal install ghcjs/lib/ghcjs-prim
 	cd $(HOMEABS) && HOME=$(HOMEABS) && utils/makePackages.sh link
