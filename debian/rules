@@ -6,6 +6,7 @@
 TOP := /
 
 BRANCH := ghc-8.4
+COMMIT := 81bf5f31dabaa711aab234cb119eb9c998ccb129
 NAME := ghcjs
 HOMEREL := usr/lib/$(NAME)
 # This was HOME, but that meant all the cabal packages got installed
@@ -34,6 +35,7 @@ debian/$(NAME)-build-stamp:
 	-rm -rf $(HOMEABS)
 	# Clone the ghcjs repository
 	git clone https://github.com/ghcjs/ghcjs -b $(BRANCH) $(HOMEABS)
+	cd $(HOMEABS) && git reset --hard $(COMMIT)
 	# Apply our local patches
 	cat ghcjs.diff | { cd $(HOMEABS) && patch -p1; }
 	#cat ghcjs-bug-666.diff | { cd $(HOMEABS) && patch -p1; }
