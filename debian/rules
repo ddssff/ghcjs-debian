@@ -5,7 +5,7 @@
 # TOP := $(PWD)
 TOP := /
 
-BRANCH := ghc-8.4
+BRANCH := ghc-8.6
 #COMMIT := 81bf5f31dabaa711aab234cb119eb9c998ccb129
 NAME := ghcjs
 HOMEREL := usr/lib/$(NAME)
