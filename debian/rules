@@ -7,6 +7,8 @@ TOP := /
 
 BRANCH := ghc-8.4
 #COMMIT := 81bf5f31dabaa711aab234cb119eb9c998ccb129
+# This is our current production compiler.
+#COMMIT := 00a8993a8d9c35b33b84a83b0aec5171c582a4f3
 NAME := ghcjs
 HOMEREL := usr/lib/$(NAME)
 # This was HOME, but that meant all the cabal packages got installed
