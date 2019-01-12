@@ -6,7 +6,8 @@
 TOP := /
 
 BRANCH := ghc-8.6
-#COMMIT := 81bf5f31dabaa711aab234cb119eb9c998ccb129
+# This commit happened on 12/31/2018, resulting compiler exhibits https://github.com/ghcjs/ghcjs/issues/725
+#COMMIT := 75c61af32d73def4409d1fe7b64659c1d28cd075
 NAME := ghcjs
 HOMEREL := usr/lib/$(NAME)
 # This was HOME, but that meant all the cabal packages got installed
